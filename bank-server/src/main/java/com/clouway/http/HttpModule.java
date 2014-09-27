@@ -1,5 +1,7 @@
 package com.clouway.http;
 
+import com.clouway.core.BankRepository;
+import com.clouway.persistent.PersistentBankRepository;
 import com.google.inject.servlet.ServletModule;
 
 /**
@@ -10,5 +12,12 @@ public class HttpModule extends ServletModule {
     @Override
     protected void configureServlets() {
         super.configureServlets();
+
+        bind(BankRepository.class).to(PersistentBankRepository.class);
     }
+
+
+
+
+
 }

@@ -1,5 +1,6 @@
 package com.clouway.persistent;
 
+import com.clouway.core.CurrentUser;
 import com.clouway.core.SessionRepository;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,6 +18,11 @@ public class PersistentSessionRepository implements SessionRepository {
     public PersistentSessionRepository(Provider<DB> dbProvider) {
 
         this.db = dbProvider.get();
+    }
+
+    @Override
+    public CurrentUser getClientName(String sessionId) {
+        return new CurrentUser("Ivan");
     }
 
     private DBCollection sessions() {
