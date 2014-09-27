@@ -8,7 +8,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
 /**
- * Created by emil on 14-9-27.
+ * Created by emil on 14-9-26.
  */
 public class PersistentSessionRepository implements SessionRepository {
 
