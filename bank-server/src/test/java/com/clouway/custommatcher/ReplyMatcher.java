@@ -8,10 +8,9 @@ import org.hamcrest.TypeSafeMatcher;
 import java.lang.reflect.Field;
 
 /**
- * Created by emil on 14-9-27.
+ * Created by emil on 14-9-25.
  */
 public class ReplyMatcher {
-
 
     /**
      * Equals contain on the <code>Reply</code> with given object.
@@ -19,11 +18,11 @@ public class ReplyMatcher {
      * @param <T>
      * @return
      */
-    public <T> Matcher contains(final T expected) {
+    public static <T> Matcher contains(final T expected) {
 
-        return new TypeSafeMatcher<Reply>() {
+        return new TypeSafeMatcher<Reply<?>>() {
             @Override
-            public boolean matchesSafely(Reply actual) {
+            public boolean matchesSafely(Reply<?> actual) {
 
                 Class clazz = actual.getClass();
 
@@ -34,11 +33,9 @@ public class ReplyMatcher {
 
                     field.setAccessible(true);
 
-                    T expected1 = (T) expected;
-
                     T actual1 = (T) field.get(actual);
 
-                    return actual1.equals(expected1);
+                    return actual1.equals(expected);
 
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     e.printStackTrace();
