@@ -1,24 +1,33 @@
-angular.module( 'team-bank', [
-  'templates-app',
-  'templates-common',
-  'transaction',
-  'ui.router'
+angular.module('team-bank', [
+    'templates-app',
+    'templates-common',
+    'transaction',
+    'ui.router'
 ])
 
-.config( function myAppConfig ( $stateProvider, $urlRouterProvider ) {
-  $urlRouterProvider.otherwise( 'transaction' );
-})
+    .config(['$urlRouterProvider', function($urlRouterProvider) {
 
-.run( function run () {
-})
+        $urlRouterProvider.otherwise('transaction');
 
-.controller( 'AppCtrl', function AppCtrl ( $scope, $location ) {
-  $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
-    if ( angular.isDefined( toState.data.pageTitle ) ) {
-      $scope.pageTitle = toState.data.pageTitle + ' | team-bank' ;
-    }
-  });
-})
+    }])
+
+    .run(function() {
+
+    })
+
+    .controller('AppCtrl', ["$scope", function ($scope) {
+
+        $scope.$on('$stateChangeSuccess', function (event, toState) {
+            if (angular.isDefined(toState.data.pageTitle)) {
+                $scope.pageTitle = toState.data.pageTitle + ' | team-bank';
+            }
+        });
+
+    }])
+
+
 
 ;
+
+
 

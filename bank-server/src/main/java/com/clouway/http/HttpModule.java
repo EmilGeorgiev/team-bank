@@ -4,8 +4,10 @@ import com.clouway.core.*;
 import com.clouway.persistent.PersistentBankRepository;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.servlet.RequestScoped;
 import com.google.inject.servlet.ServletModule;
+import com.google.inject.servlet.SessionScoped;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -17,12 +19,14 @@ public class HttpModule extends ServletModule {
 
     @Override
     protected void configureServlets() {
-        super.configureServlets();
+
+        filter("/bankService/*").through(SecurityFilter.class);
 
         bind(BankRepository.class).to(PersistentBankRepository.class);
         bind(IdGenerator.class).to(SessionIdGenerator.class);
         bind(SiteMap.class).to(LabelMap.class);
         bind(Clock.class).to(CalendarUtil.class);
+
     }
 
     @Provides
@@ -43,6 +47,12 @@ public class HttpModule extends ServletModule {
     @Provides
     @RequestScoped
     public Session getCurrentSession(Provider<HttpServletRequest> requestProvider, SessionRepository sessionRepository, SiteMap siteMap) {
+        HttpServletRequest request = requestProvider.get();
+        if(request==null){
+            System.out.println("Nullable request");
+            return null;
+        }
+
         Cookie[] cookies = requestProvider.get().getCookies();
 
         if (cookies != null) {
@@ -55,9 +65,4 @@ public class HttpModule extends ServletModule {
         }
         return null;
     }
-
-
-
-
-
 }

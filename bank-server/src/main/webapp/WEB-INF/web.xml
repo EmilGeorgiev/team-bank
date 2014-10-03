@@ -20,6 +20,6 @@
     </listener>
 
     <welcome-file-list>
-        <welcome-file>loginController</welcome-file>
+        <welcome-file>login.html</welcome-file>
     </welcome-file-list>
 </web-app>
