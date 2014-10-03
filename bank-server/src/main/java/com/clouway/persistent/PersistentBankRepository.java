@@ -40,7 +40,7 @@ public class PersistentBankRepository implements BankRepository {
 
         bankAccounts().update(query, update);
 
-        return new TransactionInfo(transactionMessages.success(), getAmountBy(currentUser.getName()).getAmount());
+        return new TransactionInfo(transactionMessages.success(), getAmount().getAmount());
     }
 
     /**
@@ -69,9 +69,9 @@ public class PersistentBankRepository implements BankRepository {
     }
 
     @Override
-    public Amount getAmountBy(String clientName) {
+    public Amount getAmount() {
 
-        DBObject criteria = new BasicDBObject("name", clientName);
+        DBObject criteria = new BasicDBObject("name", currentUser.getName());
 
         DBObject projection = new BasicDBObject("amount", 1)
                 .append("_id", 0);

@@ -18,6 +18,10 @@ public class Session {
         this.expirationTime = expirationTime;
     }
 
+    public Session(String session) {
+        this.sessionId = session;
+    }
+
     public String getSessionId() {
         return sessionId;
     }

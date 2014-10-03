@@ -4,6 +4,7 @@ import com.clouway.core.CurrentUser;
 import com.clouway.core.SessionRepository;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.servlet.RequestScoped;
 import com.google.sitebricks.SitebricksModule;
 
 import javax.servlet.http.Cookie;
@@ -20,20 +21,28 @@ public class Sitbricks extends SitebricksModule {
         scan(LoginCtrl.class.getPackage());
         
         at("/bankService").serve(BankService.class);
+
     }
 
     @Provides
+    @RequestScoped
     public CurrentUser getCurrentUserName(Provider<HttpServletRequest> request, SessionRepository sessionRepository) {
 
-        Cookie[] cookies = request.get().getCookies();
+        HttpServletRequest servletRequest = request.get();
 
-        if(cookies != null) {
-            for(Cookie cookie : cookies) {
-                if("sid".equals(cookie.getName())) {
-                    return sessionRepository.getClientName(cookie.getValue());
+        if(servletRequest != null) {
+            Cookie[] cookies = request.get().getCookies();
+
+            if(cookies != null) {
+                for(Cookie cookie : cookies) {
+                    if("sid".equals(cookie.getName())) {
+                        return sessionRepository.getClientName(cookie.getValue());
+                    }
                 }
             }
         }
+
+
 
         return null;
     }
