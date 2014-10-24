@@ -19,34 +19,53 @@ import static org.hamcrest.core.IsNull.nullValue;
 public class RegistrationCtrlTest {
     private RegistrationCtrl registrationCtrl;
     private DTOUser dtoUser = new DTOUser();
+    private User user;
+
     @Rule
     public JUnitRuleMockery context = new JUnitRuleMockery();
+
     @Mock
     UserRepository repository;
+
     @Mock
     Validator validator;
+
     @Mock
     SiteMap siteMap;
 
     @Before
     public void setUp() {
+
+
         registrationCtrl = new RegistrationCtrl(validator, repository, siteMap);
+
+        dtoUser = registrationCtrl.getDtoUser();
+        dtoUser.setUsername("username");
+        dtoUser.setPassword("password");
+
+        user = new User("username", "password");
     }
 
     @Test
     public void createAccount() {
+
         final Optional<User> optional = Optional.absent();
+
         context.checking(new Expectations() {
             {
-                oneOf(validator).isValid(dtoUser);
+                oneOf(validator).isValid(user);
                 will(returnValue(true));
-                oneOf(repository).findByName(null);
+
+                oneOf(repository).findByName("username");
                 will(returnValue(optional));
-                oneOf(repository).add(dtoUser);
+
+                oneOf(repository).add(user);
+
                 oneOf(siteMap).loginPage();
                 will(returnValue("/login"));
             }
         });
+
         assertThat(registrationCtrl.register(), is("/login"));
     }
 
@@ -55,10 +74,12 @@ public class RegistrationCtrlTest {
         final Optional<User> optional = Optional.fromNullable(new User("name", "pass"));
         context.checking(new Expectations() {
             {
-                oneOf(validator).isValid(dtoUser);
+                oneOf(validator).isValid(user);
                 will(returnValue(true));
-                oneOf(repository).findByName(null);
+
+                oneOf(repository).findByName("username");
                 will(returnValue(optional));
+
                 oneOf(siteMap).occupiedUsername();
             }
         });
@@ -70,7 +91,7 @@ public class RegistrationCtrlTest {
         final Optional<User> optional = Optional.absent();
         context.checking(new Expectations() {
             {
-                oneOf(validator).isValid(dtoUser);
+                oneOf(validator).isValid(user);
                 will(returnValue(false));
                 oneOf(siteMap).dataMissmatch();
             }

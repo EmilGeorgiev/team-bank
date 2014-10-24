@@ -56,12 +56,12 @@ public class PersistentUserRepository implements UserRepository {
     }
 
     @Override
-    public void add(DTOUser DTOUser) {
+    public void add(User user) {
 
-        DBObject query = new BasicDBObject("username", DTOUser.getUsername()).
-                append("password", DTOUser.getPassword());
+        DBObject query = new BasicDBObject("username", user.getName()).
+                append("password", user.getPassword());
 
-        createAccount(DTOUser.getUsername());
+        createAccount(user.getName());
         users().insert(query);
     }
 

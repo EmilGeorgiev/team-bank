@@ -11,5 +11,5 @@ public interface UserRepository {
 
     Optional<User> findByName(String username);
 
-    void add(DTOUser DTOUser);
+    void add(User DTOUser);
 }

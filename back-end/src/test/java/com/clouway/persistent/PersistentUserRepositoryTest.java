@@ -1,5 +1,6 @@
 package com.clouway.persistent;
 
+import com.clouway.core.User;
 import com.clouway.persistent.util.UserUtil;
 import com.clouway.core.DTOUser;
 import com.google.inject.util.Providers;
@@ -20,6 +21,7 @@ public class PersistentUserRepositoryTest {
     private PersistentUserRepository persistentUserRepository;
     private DB db;
     private DTOUser DTOUser;
+    private User user;
 
     private UserUtil userUtil;
 
@@ -48,7 +50,7 @@ public class PersistentUserRepositoryTest {
     public void userIsAuthorised() {
         DTOUser.setUsername("Brahmaputra");
         DTOUser.setPassword("123456");
-        persistentUserRepository.add(DTOUser);
+        persistentUserRepository.add(user);
 //        assertThat(persistentUserRepository.isAuthorised(DTOUser), is(true));
     }
 
@@ -56,7 +58,7 @@ public class PersistentUserRepositoryTest {
     public void userBankAccountWasCreatedAfterRegistration() {
         DTOUser.setUsername("Ivan");
         DTOUser.setPassword("123456");
-        persistentUserRepository.add(DTOUser);
+        persistentUserRepository.add(user);
         assertThat(accounts().findOne(), notNullValue());
     }
 

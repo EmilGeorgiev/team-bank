@@ -104,8 +104,6 @@ public class BankServiceTest {
     @Test
     public void withdrawAmount() {
 
-        dtoAmount.setAmount("123");
-
         context.checking(new Expectations() {
             {
 
