@@ -26,7 +26,7 @@ public class LoginCtrlTest {
     @Rule
     public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    private DTOUser dtoUser;
+    private User user;
     private LoginCtrl loginCtrl;
     private FakeHttpResponse response;
 
@@ -45,8 +45,13 @@ public class LoginCtrlTest {
     @Before
     public void setUp() {
 
-        dtoUser = new DTOUser();
         loginCtrl = new LoginCtrl(userRepository, sessionRepository, idGenerator, siteMap);
+
+        DTOUser dtoUser = loginCtrl.getDtoUser();
+        dtoUser.setUsername("username");
+        dtoUser.setPassword("password");
+
+        user = new User("username", "password");
 
         response = new FakeHttpResponse() {
             @Override
@@ -56,22 +61,21 @@ public class LoginCtrlTest {
         };
     }
 
-
     @Test
     public void authenticate() throws ServletException, IOException {
 
         context.checking(new Expectations() {
             {
-                oneOf(userRepository).find(dtoUser);
-                will(returnValue(Optional.of(dtoUser)));
+                oneOf(userRepository).find(user);
+                will(returnValue(Optional.of(user)));
 
-                oneOf(idGenerator).generateFor(dtoUser);
+                oneOf(idGenerator).generateFor(user);
                 will(returnValue("sessionId"));
 
                 oneOf(siteMap).sessionCookieName();
                 will(returnValue("sId"));
 
-                oneOf(sessionRepository).addUser(dtoUser.getUsername(), "sessionId");
+                oneOf(sessionRepository).addUser(user.getName(), "sessionId");
             }
         });
         assertThat(loginCtrl.authenticate(response), is("/"));
@@ -82,7 +86,7 @@ public class LoginCtrlTest {
 
         context.checking(new Expectations() {
             {
-                oneOf(userRepository).find(dtoUser);
+                oneOf(userRepository).find(user);
                 will(returnValue(Optional.absent()));
 
                 oneOf(siteMap).loginFailed();
