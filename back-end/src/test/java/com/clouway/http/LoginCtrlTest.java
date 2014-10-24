@@ -89,6 +89,6 @@ public class LoginCtrlTest {
                 will(returnValue("Error"));
             }
         });
-        assertThat(loginCtrl.authenticate(response), is("/login"));
+        assertThat(loginCtrl.authenticate(response), nullValue());
     }
 }

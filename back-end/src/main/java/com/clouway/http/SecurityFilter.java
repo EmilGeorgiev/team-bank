@@ -9,9 +9,12 @@ import com.google.inject.Singleton;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.parser.Entity;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * @author Emil Georgiev <emogeorgiev88@gmail.com>.
@@ -21,12 +24,14 @@ public class SecurityFilter implements Filter {
 
     private final Provider<Session> sessionProvider;
     private final SiteMap siteMap;
+    private final Provider<Set<String>> setProvider;
 
     @Inject
-    public SecurityFilter(Provider<Session> sessionProvider, SiteMap siteMap) {
+    public SecurityFilter(Provider<Session> sessionProvider, SiteMap siteMap, Provider<Set<String>> setProvider) {
 
         this.sessionProvider = sessionProvider;
         this.siteMap = siteMap;
+        this.setProvider = setProvider;
     }
 
     @Override
@@ -41,6 +46,13 @@ public class SecurityFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
 
         String uri = request.getRequestURI();
+
+        for(String resource: setProvider.get()) {
+            if(uri.contains(resource)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
 
         Session session = sessionProvider.get();
 

@@ -11,6 +11,8 @@ import com.google.inject.servlet.ServletModule;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by emil on 14-9-24.
@@ -28,6 +30,20 @@ public class HttpModule extends ServletModule {
         bind(Clock.class).to(CalendarUtil.class);
         bind(Validator.class).annotatedWith(Names.named("UserValidator")).to(RegxUserValidator.class);
         bind(Validator.class).annotatedWith(Names.named("AmountValidator")).to(RegxAmountValidator.class);
+
+    }
+
+
+    @Provides
+    public Set<String> unchekedresources() {
+        Set<String> unsecureResources = new HashSet<>();
+
+        unsecureResources.add("/login");
+        unsecureResources.add("/logout");
+        unsecureResources.add("/registration");
+
+
+        return unsecureResources;
 
     }
 

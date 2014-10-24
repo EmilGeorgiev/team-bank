@@ -26,6 +26,7 @@ public class BankServiceTest {
     private FakeRequestReader fakeRequestReader;
     private TransactionStatus transactionStatus;
     private DTOAmount dtoAmount = new DTOAmount();
+    private Amount amount;
 
     @Rule
     public JUnitRuleMockery context = new JUnitRuleMockery();
@@ -51,6 +52,8 @@ public class BankServiceTest {
 
         dtoAmount.setAmount("123");
 
+        amount = new Amount(dtoAmount.getAmount());
+
         fakeRequestReader = new FakeRequestReader(dtoAmount);
 
         transactionStatus = new TransactionStatus(message("Success"), "100");
@@ -65,7 +68,7 @@ public class BankServiceTest {
                 oneOf(request).read(DTOAmount.class);
                 will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(dtoAmount);
+                oneOf(validator).isValid(amount);
                 will(returnValue(true));
 
                 oneOf(bankRepository).deposit(new BigDecimal(dtoAmount.getAmount()));
@@ -87,7 +90,7 @@ public class BankServiceTest {
                 oneOf(request).read(DTOAmount.class);
                 will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(dtoAmount);
+                oneOf(validator).isValid(amount);
                 will(returnValue(false));
 
                 oneOf(siteMap).transactionError();
@@ -109,10 +112,10 @@ public class BankServiceTest {
                 oneOf(request).read(DTOAmount.class);
                 will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(dtoAmount);
+                oneOf(validator).isValid(amount);
                 will(returnValue(true));
 
-                oneOf(bankRepository).withdraw(new BigDecimal(dtoAmount.getAmount()));
+                oneOf(bankRepository).withdraw(new BigDecimal(amount.getAmount()));
                 will(returnValue(transactionStatus));
             }
         });
@@ -130,7 +133,7 @@ public class BankServiceTest {
                 oneOf(request).read(DTOAmount.class);
                 will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(dtoAmount);
+                oneOf(validator).isValid(amount);
                 will(returnValue(false));
 
                 oneOf(siteMap).transactionError();

@@ -5,11 +5,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Show;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Created by clouway on 14-9-25.
@@ -46,7 +49,7 @@ public class LoginCtrl {
 
         if (!userRepository.find(dtoUser).isPresent()) {
             error = siteMap.loginFailed();
-            return "/login";
+            return null;
         }
 
         String sessionId = idGenerator.generateFor(dtoUser);
