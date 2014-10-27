@@ -1,12 +1,15 @@
 package com.clouway.http;
 
+import com.clouway.core.Clock;
 import com.clouway.core.Session;
+import com.clouway.core.SessionRepository;
 import com.clouway.core.SiteMap;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.html.parser.Entity;
@@ -22,16 +25,18 @@ import java.util.Set;
 @Singleton
 public class SecurityFilter implements Filter {
 
-    private final Provider<Session> sessionProvider;
     private final SiteMap siteMap;
     private final Provider<Set<String>> setProvider;
+    private final Clock clock;
+    private final SessionRepository sessionRepository;
 
     @Inject
-    public SecurityFilter(Provider<Session> sessionProvider, SiteMap siteMap, Provider<Set<String>> setProvider) {
+    public SecurityFilter(SiteMap siteMap, Provider<Set<String>> setProvider, Clock clock, SessionRepository sessionRepository) {
 
-        this.sessionProvider = sessionProvider;
         this.siteMap = siteMap;
         this.setProvider = setProvider;
+        this.clock = clock;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
@@ -54,11 +59,19 @@ public class SecurityFilter implements Filter {
             }
         }
 
-        Session session = sessionProvider.get();
+        String sessionID = null;
 
-        Date currentTime = new Timestamp(System.currentTimeMillis());
+        Cookie[] cookies = request.getCookies();
 
-        if (session == null || session.getExpirationTime().before(currentTime)) {
+        if (cookies != null) {
+            for(Cookie cookie : cookies) {
+                if("sid".equals(cookie.getName())) {
+                    sessionID = cookie.getValue();
+                }
+            }
+        }
+
+        if (!sessionRepository.find(sessionID).isPresent()) {
             if (uri.contains("amount")) {
 
                 response.setStatus(401);

@@ -5,14 +5,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Show;
-import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * Created by clouway on 14-9-25.
@@ -28,7 +25,7 @@ public class LoginCtrl {
     private IdGenerator idGenerator;
     private SiteMap siteMap;
     private String error;
-    private DTOUser dtoUser = new DTOUser();
+    private user dtoUser = new user();
 
     @Inject
     public LoginCtrl(UserRepository userRepository, SessionRepository sessionRepository, IdGenerator idGenerator, SiteMap siteMap) {
@@ -55,16 +52,16 @@ public class LoginCtrl {
         }
 
         String sessionId = idGenerator.generateFor(user);
-        sessionRepository.addUser(user.getName(), sessionId);
+        sessionRepository.addNewSession(user.getName(), sessionId);
         response.addCookie(new Cookie(siteMap.sessionCookieName(), sessionId));
         return "/";
     }
 
-    public DTOUser getDtoUser() {
+    public user getDtoUser() {
         return dtoUser;
     }
 
-    public void setDtoUser(DTOUser dtoUser) {
+    public void setDtoUser(user dtoUser) {
         this.dtoUser = dtoUser;
     }
 

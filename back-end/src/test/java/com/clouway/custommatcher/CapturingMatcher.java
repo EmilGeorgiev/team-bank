@@ -7,13 +7,13 @@ import org.hamcrest.Matcher;
 /**
  * Created by emil on 14-9-30.
  */
-public class CaptureMatcher<T> extends BaseMatcher<T> {
+public class CapturingMatcher<T> extends BaseMatcher<T> {
 
     private final Matcher<T> baseMatcher;
 
     private Object captureArgument;
 
-    public CaptureMatcher(Matcher<T> baseMatcher) {
+    public CapturingMatcher(Matcher<T> baseMatcher) {
         this.baseMatcher = baseMatcher;
     }
 

@@ -9,7 +9,7 @@ public interface SessionRepository {
 
     CurrentUser findUserBy(String sessionId);
 
-    void addUser(String username, String sessionId);
+    void addNewSession(String username, String sessionId);
 
     void remove(String sessionId);
 

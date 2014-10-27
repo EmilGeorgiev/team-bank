@@ -27,7 +27,7 @@ public class HttpModule extends ServletModule {
         bind(BankRepository.class).to(PersistentBankRepository.class);
         bind(IdGenerator.class).to(SessionIdGenerator.class);
         bind(SiteMap.class).to(LabelMap.class);
-        bind(Clock.class).to(CalendarUtil.class);
+        bind(Clock.class).to(SystemClock.class);
         bind(Validator.class).annotatedWith(Names.named("UserValidator")).to(RegxUserValidator.class);
         bind(Validator.class).annotatedWith(Names.named("AmountValidator")).to(RegxAmountValidator.class);
 

@@ -42,8 +42,9 @@ public class PersistentSessionRepository implements SessionRepository {
     }
 
     @Override
-    public void addUser(String username, String sessionId) {
-        Date date = clock.sessionExpirationTime(Calendar.getInstance());
+    public void addNewSession(String username, String sessionId) {
+
+        Date date = getDateExpired(clock.now());
 
         DBObject query = new BasicDBObject("username", username)
 
@@ -54,6 +55,8 @@ public class PersistentSessionRepository implements SessionRepository {
 
         sessions().insert(query);
     }
+
+
 
     @Override
     public void remove(String sessionId) {
@@ -84,6 +87,17 @@ public class PersistentSessionRepository implements SessionRepository {
 
         return Optional.fromNullable(new Session(dbObject.getString("username"),
                 dbObject.getString("sessionId"), dbObject.getDate("expirationTime")));
+    }
+
+    private Date getDateExpired(Date date) {
+
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(date);
+
+        calendar.add(Calendar.MINUTE, 60);
+
+        return calendar.getTime();
     }
 
     private DBCollection sessions() {

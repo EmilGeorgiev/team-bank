@@ -8,27 +8,25 @@ import java.util.Date;
 /**
  * @author Emil Georgiev <emogeorgiev88@gmail.com>.
  */
-public class ClockUtil implements Clock {
+public class CalendarUtil implements Clock {
+
+
     private final int year;
     private final int month;
     private final int day;
-    private final int hours;
-    private final int minutes;
-    private final int seconds;
+    private final int hour;
+    private final int minute;
+    private final int second;
 
-    public ClockUtil(int year, int month, int day, int hours, int minutes, int seconds) {
+    public CalendarUtil(int year, int month, int day, int hour, int minute, int second) {
+
 
         this.year = year;
         this.month = month;
         this.day = day;
-        this.hours = hours;
-        this.minutes = minutes;
-        this.seconds = seconds;
-    }
-
-    @Override
-    public Date sessionExpirationTime(Calendar calendar) {
-        return calendar.getTime();
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
     }
 
     @Override
@@ -39,9 +37,9 @@ public class ClockUtil implements Clock {
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH, day);
-        calendar.set(Calendar.HOUR_OF_DAY, hours);
-        calendar.set(Calendar.MINUTE, minutes);
-        calendar.set(Calendar.SECOND, seconds);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, second);
 
         return calendar.getTime();
     }

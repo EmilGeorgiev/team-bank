@@ -1,10 +1,11 @@
 package com.clouway.http;
 
 import com.clouway.core.Session;
-import com.clouway.core.SiteMap;
 import com.clouway.core.SessionRepository;
-import com.clouway.http.util.DateTimeUtil;
-import com.clouway.persistent.util.ClockUtil;
+import com.clouway.core.SiteMap;
+import com.clouway.custommatcher.CapturingMatcher;
+import com.clouway.persistent.util.CalendarUtil;
+import com.google.common.base.Optional;
 import com.google.inject.util.Providers;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -19,8 +20,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +28,8 @@ public class SecurityFilterTest {
     private SecurityFilter securityFilter;
     private Session session;
     private Set<String> unsecureResources = new HashSet<>();
-    private ClockUtil clockUtil = new ClockUtil(2014, 10, 27, 10, 30, 20);
+    private CalendarUtil calendarUtil = new CalendarUtil(2014, 10, 27, 10, 30, 20);
+    private Cookie[] cookies;
 
 
     @Rule
@@ -47,6 +47,9 @@ public class SecurityFilterTest {
     @Mock
     private SiteMap siteMap;
 
+    @Mock
+    private SessionRepository sessionRepository;
+
     @Before
     public void setUp() {
 
@@ -54,19 +57,17 @@ public class SecurityFilterTest {
         unsecureResources.add("/registration");
         unsecureResources.add("/logout");
 
+        cookies = new Cookie[]{new Cookie("sid", "123")};
 
+        securityFilter = new SecurityFilter(siteMap, Providers.of(unsecureResources), calendarUtil, sessionRepository);
 
     }
 
     @Test
     public void sessionIsNotExpired() throws IOException, ServletException {
 
-        Calendar expiratinDate = Calendar.getInstance();
-        expiratinDate.set(Calendar.ZONE_OFFSET, 1);
-
-        session = new Session("username", "12345", clockUtil.sessionExpirationTime(expiratinDate));
-
-        securityFilter = new SecurityFilter(Providers.of(session), siteMap, Providers.of(unsecureResources));
+        final CapturingMatcher<Cookie[]> capturingMatcher =
+                new CapturingMatcher<>(Expectations.any(Cookie[].class));
 
 
         context.checking(new Expectations() {
@@ -74,6 +75,12 @@ public class SecurityFilterTest {
 
                 oneOf(request).getRequestURI();
                 will(returnValue("/"));
+
+                oneOf(request).getCookies();
+                will(returnValue(cookies));
+
+                oneOf(sessionRepository).find(sessionID("123"));
+                will(returnValue(Optional.of(Session.class)));
 
                 oneOf(filterChain).doFilter(request, response);
             }
@@ -84,26 +91,21 @@ public class SecurityFilterTest {
     }
 
 
+
     @Test
     public void sessionIsExpired() throws IOException, ServletException {
-
-        Calendar expiratinDate = Calendar.getInstance();
-        expiratinDate.set(Calendar.YEAR, 2014);
-        expiratinDate.set(Calendar.MONTH, 10);
-        expiratinDate.set(Calendar.DAY_OF_MONTH, 27);
-        expiratinDate.set(Calendar.HOUR_OF_DAY, 9);
-        expiratinDate.set(Calendar.MINUTE, 30);
-        expiratinDate.set(Calendar.SECOND, 20);
-
-        session = new Session("username", "12345", clockUtil.sessionExpirationTime(expiratinDate));
-
-        securityFilter = new SecurityFilter(Providers.of(session), siteMap, Providers.of(unsecureResources));
 
         context.checking(new Expectations() {
             {
 
                 oneOf(request).getRequestURI();
                 will(returnValue("/"));
+
+                oneOf(request).getCookies();
+                will(returnValue(cookies));
+
+                oneOf(sessionRepository).find(sessionID("123"));
+                will(returnValue(Optional.absent()));
 
                 oneOf(siteMap).loginPage();
                 will(returnValue("/login"));
@@ -114,5 +116,31 @@ public class SecurityFilterTest {
 
         securityFilter.doFilter(request, response, filterChain);
 
+
+    }
+
+    @Test
+    public void sessionIsExpiredAndRequestURIContainsAmount() throws Exception {
+
+        context.checking(new Expectations() {{
+            oneOf(request).getRequestURI();
+            will(returnValue("/amount"));
+
+            oneOf(request).getCookies();
+            will(returnValue(cookies));
+
+            oneOf(sessionRepository).find(sessionID("123"));
+            will(returnValue(Optional.absent()));
+
+            oneOf(response).setStatus(401);
+        }
+        });
+
+        securityFilter.doFilter(request, response, filterChain);
+
+    }
+
+    private String sessionID(String sessionID) {
+        return sessionID;
     }
 }

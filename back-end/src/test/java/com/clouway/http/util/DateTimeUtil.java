@@ -27,11 +27,6 @@ public class DateTimeUtil implements Clock{
     }
 
     @Override
-    public Date sessionExpirationTime(Calendar calendar) {
-        return calendar.getTime();
-    }
-
-    @Override
     public Date now() {
         Calendar calendar = Calendar.getInstance();
 

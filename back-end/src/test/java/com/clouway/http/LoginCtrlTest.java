@@ -47,7 +47,7 @@ public class LoginCtrlTest {
 
         loginCtrl = new LoginCtrl(userRepository, sessionRepository, idGenerator, siteMap);
 
-        DTOUser dtoUser = loginCtrl.getDtoUser();
+        com.clouway.core.user dtoUser = loginCtrl.getDtoUser();
         dtoUser.setUsername("username");
         dtoUser.setPassword("password");
 
@@ -75,7 +75,7 @@ public class LoginCtrlTest {
                 oneOf(siteMap).sessionCookieName();
                 will(returnValue("sId"));
 
-                oneOf(sessionRepository).addUser(user.getName(), "sessionId");
+                oneOf(sessionRepository).addNewSession(user.getName(), "sessionId");
             }
         });
         assertThat(loginCtrl.authenticate(response), is("/"));
