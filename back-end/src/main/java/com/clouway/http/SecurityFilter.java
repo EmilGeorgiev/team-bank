@@ -27,15 +27,13 @@ public class SecurityFilter implements Filter {
 
     private final SiteMap siteMap;
     private final Provider<Set<String>> setProvider;
-    private final Clock clock;
     private final SessionRepository sessionRepository;
 
     @Inject
-    public SecurityFilter(SiteMap siteMap, Provider<Set<String>> setProvider, Clock clock, SessionRepository sessionRepository) {
+    public SecurityFilter(SiteMap siteMap, Provider<Set<String>> setProvider, SessionRepository sessionRepository) {
 
         this.siteMap = siteMap;
         this.setProvider = setProvider;
-        this.clock = clock;
         this.sessionRepository = sessionRepository;
     }
 

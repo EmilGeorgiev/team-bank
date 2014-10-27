@@ -4,7 +4,6 @@ import com.clouway.core.Session;
 import com.clouway.core.SessionRepository;
 import com.clouway.core.SiteMap;
 import com.clouway.custommatcher.CapturingMatcher;
-import com.clouway.persistent.util.CalendarUtil;
 import com.google.common.base.Optional;
 import com.google.inject.util.Providers;
 import org.jmock.Expectations;
@@ -28,7 +27,6 @@ public class SecurityFilterTest {
     private SecurityFilter securityFilter;
     private Session session;
     private Set<String> unsecureResources = new HashSet<>();
-    private CalendarUtil calendarUtil = new CalendarUtil(2014, 10, 27, 10, 30, 20);
     private Cookie[] cookies;
 
 
@@ -59,7 +57,7 @@ public class SecurityFilterTest {
 
         cookies = new Cookie[]{new Cookie("sid", "123")};
 
-        securityFilter = new SecurityFilter(siteMap, Providers.of(unsecureResources), calendarUtil, sessionRepository);
+        securityFilter = new SecurityFilter(siteMap, Providers.of(unsecureResources), sessionRepository);
 
     }
 
@@ -90,8 +88,6 @@ public class SecurityFilterTest {
 
     }
 
-
-
     @Test
     public void sessionIsExpired() throws IOException, ServletException {
 
@@ -115,7 +111,6 @@ public class SecurityFilterTest {
         });
 
         securityFilter.doFilter(request, response, filterChain);
-
 
     }
 
