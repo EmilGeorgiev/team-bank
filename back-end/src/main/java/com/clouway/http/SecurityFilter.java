@@ -78,6 +78,9 @@ public class SecurityFilter implements Filter {
             response.sendRedirect(siteMap.loginPage());
             return;
         }
+
+        sessionRepository.updateSession(sessionID);
+
         filterChain.doFilter(request, response);
     }
 

@@ -80,6 +80,8 @@ public class SecurityFilterTest {
                 oneOf(sessionRepository).find(sessionID("123"));
                 will(returnValue(Optional.of(Session.class)));
 
+                oneOf(sessionRepository).updateSession("123");
+
                 oneOf(filterChain).doFilter(request, response);
             }
         });

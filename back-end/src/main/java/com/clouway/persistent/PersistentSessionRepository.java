@@ -89,6 +89,18 @@ public class PersistentSessionRepository implements SessionRepository {
                 dbObject.getString("sessionId"), dbObject.getDate("expirationTime")));
     }
 
+    @Override
+    public void updateSession(String sessionID) {
+        Date date = getDateExpired(clock.now());
+
+        DBObject query = new BasicDBObject("sessionId", sessionID);
+
+        DBObject update = new BasicDBObject("$set", new BasicDBObject("expirationTime", date));
+
+        sessions().update(query, update);
+
+    }
+
     private Date getDateExpired(Date date) {
 
         Calendar calendar = Calendar.getInstance();

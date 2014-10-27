@@ -14,4 +14,6 @@ public interface SessionRepository {
     void remove(String sessionId);
 
     Optional<Session> find(String sessionId);
+
+    void updateSession(String sessionID);
 }
