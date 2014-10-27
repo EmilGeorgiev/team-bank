@@ -101,6 +101,14 @@ public class PersistentSessionRepository implements SessionRepository {
 
     }
 
+    @Override
+    public void removeSessionOn(String username) {
+
+        DBObject query = new BasicDBObject("username", username);
+
+        sessions().remove(query);
+    }
+
     private Date getDateExpired(Date date) {
 
         Calendar calendar = Calendar.getInstance();

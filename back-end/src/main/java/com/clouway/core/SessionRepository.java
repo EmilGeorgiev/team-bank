@@ -16,4 +16,6 @@ public interface SessionRepository {
     Optional<Session> find(String sessionId);
 
     void updateSession(String sessionID);
+
+    void removeSessionOn(String username);
 }

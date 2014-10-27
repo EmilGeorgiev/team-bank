@@ -1,8 +1,10 @@
 package com.clouway.http;
 
+import com.clouway.core.CurrentUser;
 import com.clouway.core.Session;
 import com.clouway.core.SessionRepository;
 import com.clouway.core.SiteMap;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -20,7 +22,9 @@ import com.google.sitebricks.http.Post;
 public class LogoutService {
 
     private SessionRepository sessionRepository;
-    private Provider<Session> currentSessionProvider;
+
+
+    private final Provider<Session> currentSessionProvider;
     private SiteMap siteMap;
 
     @Inject
@@ -35,7 +39,10 @@ public class LogoutService {
 
         Session session = currentSessionProvider.get();
 
-        sessionRepository.remove(session.getSessionId());
+        if(session != null) {
+
+            sessionRepository.remove(session.getSessionId());
+        }
 
         return Reply.with(siteMap.loginPage()).ok();
     }

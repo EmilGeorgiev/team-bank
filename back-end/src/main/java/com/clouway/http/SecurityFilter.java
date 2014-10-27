@@ -1,7 +1,5 @@
 package com.clouway.http;
 
-import com.clouway.core.Clock;
-import com.clouway.core.Session;
 import com.clouway.core.SessionRepository;
 import com.clouway.core.SiteMap;
 import com.google.inject.Inject;
@@ -12,11 +10,7 @@ import javax.servlet.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.text.html.parser.Entity;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.EnumSet;
 import java.util.Set;
 
 /**
