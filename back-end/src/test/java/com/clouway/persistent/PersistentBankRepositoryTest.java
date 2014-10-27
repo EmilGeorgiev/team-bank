@@ -60,12 +60,12 @@ public class PersistentBankRepositoryTest {
     @Test
     public void depositAmount() throws Exception {
 
-        pretendThat(clientName("Ivan"), amount(100d));
+        pretendThat(clientName("Ivan"), amount("100"));
 
         TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(20));
 
         assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("120.0"));
+        assertThat(info.amount, is("120"));
 
     }
 
@@ -73,49 +73,49 @@ public class PersistentBankRepositoryTest {
     @Test
     public void makeTwoDepositTransactions() throws Exception {
 
-        pretendThat(clientName("Ivan"), amount(100d));
+        pretendThat(clientName("Ivan"), amount("100"));
 
         persistentBankRepository.deposit(BigDecimal.valueOf(20));
         TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(80));
 
         assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("200.0"));
+        assertThat(info.amount, is("200"));
 
     }
 
     @Test
     public void withdrawAmount() throws Exception {
 
-        pretendThat(clientName("Ivan"), amount(200d));
+        pretendThat(clientName("Ivan"), amount("200"));
 
         TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(120));
 
         assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("80.0"));
+        assertThat(info.amount, is("80"));
 
     }
 
     @Test
     public void withdrawMoreThanWeHave() throws Exception {
 
-        pretendThat(clientName("Ivan"), amount(100d));
+        pretendThat(clientName("Ivan"), amount("100"));
 
         TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(200));
 
         assertThat(info.message, is("Failed"));
-        assertThat(info.amount, is("100.0"));
+        assertThat(info.amount, is("100"));
 
     }
 
-    private void pretendThat(String clientName, double amount) {
-        bankUtil.registerNewUser(clientName, amount);
+    private void pretendThat(String clientName, String amount) {
+        bankUtil.registerNewAccount(clientName, amount);
     }
 
     private String clientName(String name) {
         return name;
     }
 
-    private double amount(double amount) {
+    private String amount(String amount) {
         return amount;
     }
 

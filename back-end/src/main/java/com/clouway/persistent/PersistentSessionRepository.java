@@ -1,9 +1,6 @@
 package com.clouway.persistent;
 
-import com.clouway.core.Clock;
-import com.clouway.core.CurrentUser;
-import com.clouway.core.Session;
-import com.clouway.core.SessionRepository;
+import com.clouway.core.*;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -14,6 +11,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by emil on 14-9-26.
@@ -45,11 +43,12 @@ public class PersistentSessionRepository implements SessionRepository {
 
     @Override
     public void addUser(String username, String sessionId) {
+        Date date = clock.sessionExpirationTime(Calendar.getInstance());
 
         DBObject query = new BasicDBObject("username", username)
 
                 .append("sessionId", sessionId)
-                .append("expirationTime", clock.sessionExpirationTime(Calendar.getInstance()));
+                .append("expirationTime", date);
 
         sessions().createIndex(new BasicDBObject("expirationTime", 1), new BasicDBObject("expireAfterSeconds", 0));
 

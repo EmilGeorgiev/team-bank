@@ -18,9 +18,9 @@ public class UserUtil {
         this.db = db;
     }
 
-    public void registerClient(String name, double amount) {
-        DBObject query = new BasicDBObject("name", name)
-                .append("amount", amount);
+    public void registerClient(String name, String password) {
+        DBObject query = new BasicDBObject("username", name)
+                .append("password", password);
 
         users().insert(query);
     }

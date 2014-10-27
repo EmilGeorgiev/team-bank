@@ -21,7 +21,7 @@ public class BankUtil {
      * @param clientName name of the ne client
      * @param amount amount of the new client
      */
-    public void registerNewUser(String clientName, double amount) {
+    public void registerNewAccount(String clientName, String amount) {
         DBObject query = new BasicDBObject("name", clientName)
                 .append("amount", amount);
 

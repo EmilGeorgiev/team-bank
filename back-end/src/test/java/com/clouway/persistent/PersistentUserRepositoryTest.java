@@ -2,7 +2,7 @@ package com.clouway.persistent;
 
 import com.clouway.core.User;
 import com.clouway.persistent.util.UserUtil;
-import com.clouway.core.DTOUser;
+import com.google.common.base.Optional;
 import com.google.inject.util.Providers;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -20,16 +20,11 @@ public class PersistentUserRepositoryTest {
 
     private PersistentUserRepository persistentUserRepository;
     private DB db;
-    private DTOUser DTOUser;
-    private User user;
-
     private UserUtil userUtil;
 
     @Before
     public void setUp() throws UnknownHostException {
         MongoClient mongoClient = new MongoClient();
-
-        DTOUser = new DTOUser();
 
         db = mongoClient.getDB("team-bank-test");
 
@@ -41,25 +36,42 @@ public class PersistentUserRepositoryTest {
         accounts().drop();
     }
 
-    @Test
-    public void userIsNotAuthorised() {
-//        assertThat(persistentUserRepository.findByName(DTOUser), is(false));
-    }
 
     @Test
-    public void userIsAuthorised() {
-        DTOUser.setUsername("Brahmaputra");
-        DTOUser.setPassword("123456");
-        persistentUserRepository.add(user);
-//        assertThat(persistentUserRepository.isAuthorised(DTOUser), is(true));
+    public void findUserByName() throws Exception {
+
+        pretendThatHasUser(name("username"), password("password"));
+
+        Optional<User> optional = persistentUserRepository.findByName("username");
+
+        User user = optional.get();
+
+        assertThat(user.getName(), is("username"));
+        assertThat(user.getPassword(), is("password"));
     }
+
+
 
     @Test
     public void userBankAccountWasCreatedAfterRegistration() {
-        DTOUser.setUsername("Ivan");
-        DTOUser.setPassword("123456");
+
+       User user = new User("Ivan", "123456");
+
         persistentUserRepository.add(user);
+
         assertThat(accounts().findOne(), notNullValue());
+    }
+
+    private void pretendThatHasUser(String username, String password) {
+        userUtil.registerClient(username, password);
+    }
+
+    private String password(String password) {
+        return password;
+    }
+
+    private String name(String username) {
+        return username;
     }
 
     private DBCollection users() {
