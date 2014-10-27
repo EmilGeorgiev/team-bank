@@ -25,7 +25,6 @@ public class PersistentBankRepositoryTest {
     private PersistentBankRepository persistentBankRepository;
     private BankUtil bankUtil;
     private DB db;
-    private CurrentUser currentUser;
 
     private TransactionMessages transactionMessages = new TransactionMessages() {
         @Override
@@ -46,7 +45,7 @@ public class PersistentBankRepositoryTest {
 
         db = mongoClient.getDB("team-bank-test");
 
-        currentUser = new CurrentUser("Ivan");
+        CurrentUser currentUser = new CurrentUser("Ivan");
 
         persistentBankRepository = new PersistentBankRepository(Providers.of(db),
                 Providers.of(currentUser), transactionMessages);

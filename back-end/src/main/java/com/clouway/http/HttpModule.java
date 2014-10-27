@@ -22,7 +22,7 @@ public class HttpModule extends ServletModule {
     @Override
     protected void configureServlets() {
 
-        filterRegex("^(?!.*(.)*login|(.)*registration|(.)*logout).*").through(SecurityFilter.class);
+        filter("/*").through(SecurityFilter.class);
 
         bind(BankRepository.class).to(PersistentBankRepository.class);
         bind(IdGenerator.class).to(SessionIdGenerator.class);

@@ -4,6 +4,7 @@ import com.clouway.core.Session;
 import com.clouway.core.SiteMap;
 import com.clouway.core.SessionRepository;
 import com.clouway.http.util.DateTimeUtil;
+import com.clouway.persistent.util.ClockUtil;
 import com.google.inject.util.Providers;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -28,6 +29,8 @@ public class SecurityFilterTest {
     private SecurityFilter securityFilter;
     private Session session;
     private Set<String> unsecureResources = new HashSet<>();
+    private ClockUtil clockUtil = new ClockUtil(2014, 10, 27, 10, 30, 20);
+
 
     @Rule
     public JUnitRuleMockery context = new JUnitRuleMockery();
@@ -53,34 +56,48 @@ public class SecurityFilterTest {
 
 
 
-        securityFilter = new SecurityFilter(Providers.of(session), siteMap, Providers.of(unsecureResources));
     }
 
     @Test
     public void sessionIsNotExpired() throws IOException, ServletException {
 
+        Calendar expiratinDate = Calendar.getInstance();
+        expiratinDate.set(Calendar.ZONE_OFFSET, 1);
+
+        session = new Session("username", "12345", clockUtil.sessionExpirationTime(expiratinDate));
+
+        securityFilter = new SecurityFilter(Providers.of(session), siteMap, Providers.of(unsecureResources));
+
+
         context.checking(new Expectations() {
             {
 
-//                oneOf(request).getRequestURI();
-//                will(returnValue("/"));
-//
-//                oneOf(siteMap).loginPage();
-//                will(returnValue("/login"));
-//
-//                oneOf(response).sendRedirect("/login");
-//
-//                oneOf(filterChain).doFilter(request, response);
+                oneOf(request).getRequestURI();
+                will(returnValue("/"));
+
+                oneOf(filterChain).doFilter(request, response);
             }
         });
 
-//        securityFilter.doFilter(request, response, filterChain);
+        securityFilter.doFilter(request, response, filterChain);
 
     }
 
 
     @Test
     public void sessionIsExpired() throws IOException, ServletException {
+
+        Calendar expiratinDate = Calendar.getInstance();
+        expiratinDate.set(Calendar.YEAR, 2014);
+        expiratinDate.set(Calendar.MONTH, 10);
+        expiratinDate.set(Calendar.DAY_OF_MONTH, 27);
+        expiratinDate.set(Calendar.HOUR_OF_DAY, 9);
+        expiratinDate.set(Calendar.MINUTE, 30);
+        expiratinDate.set(Calendar.SECOND, 20);
+
+        session = new Session("username", "12345", clockUtil.sessionExpirationTime(expiratinDate));
+
+        securityFilter = new SecurityFilter(Providers.of(session), siteMap, Providers.of(unsecureResources));
 
         context.checking(new Expectations() {
             {
