@@ -1,4 +1,5 @@
 <div ng-controller="TransactionCtrl" align="center">
+    
     <form class="css-form">
         <div class="btn-group btn-group-md">
             <span style="color: #3333ff" ng-controller="NotificationCtrl">{{message}}</span>
@@ -7,23 +8,23 @@
 
             <div>{{currentAmount}} $</div>
             <div>
-                <form name="myform" ng-submit="create()">
+                <form name="transaction" ng-submit="create()">
                     <input name="price_field"
                            class="form-control"
-                           placeholder="Enter amount"
+                           placeholder="enter an amount greater than 1"
                            ng-model="amount"
-                           require
+                           required
                            ng-pattern="/^[1-9][0-9]*(\.[0-9]{1,2})?$/">
 
                     <p></p>
 
                     <div>
                         <div>
-                            <button id="deposit" class="btn btn-primary btn-xs" type="button" ng-click="deposit(amount)"
+                            <button ng-disable="transaction.price_field.$invalid" id="deposit" class="btn btn-primary btn-xs" type="button" ng-click="deposit(amount)"
                                     >Deposit
                             </button>
 
-                            <button id="withdraw" class="btn btn-primary btn-xs" type="button"
+                            <button ng-disabled="transaction.price_field.$invalid" id="withdraw" class="btn btn-primary btn-xs" type="button"
                                     ng-click="withdraw(amount)"
                                     >Withdraw
                             </button>

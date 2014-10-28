@@ -18,7 +18,7 @@ import static org.hamcrest.core.IsNull.nullValue;
  */
 public class RegistrationCtrlTest {
     private RegistrationCtrl registrationCtrl;
-    private com.clouway.core.user dtoUser = new com.clouway.core.user();
+    private DTOUser dtoUser = new DTOUser();
     private User user;
 
     @Rule

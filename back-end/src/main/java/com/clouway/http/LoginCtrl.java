@@ -25,7 +25,7 @@ public class LoginCtrl {
     private IdGenerator idGenerator;
     private SiteMap siteMap;
     private String error;
-    private user dtoUser = new user();
+    private DTOUser dtoUser = new DTOUser();
 
     @Inject
     public LoginCtrl(UserRepository userRepository, SessionRepository sessionRepository, IdGenerator idGenerator, SiteMap siteMap) {
@@ -57,11 +57,11 @@ public class LoginCtrl {
         return "/";
     }
 
-    public user getDtoUser() {
+    public DTOUser getDtoUser() {
         return dtoUser;
     }
 
-    public void setDtoUser(user dtoUser) {
+    public void setDtoUser(DTOUser dtoUser) {
         this.dtoUser = dtoUser;
     }
 

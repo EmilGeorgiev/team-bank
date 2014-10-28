@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd back-end
 
@@ -14,9 +14,8 @@ grunt package
 
 cd ..
 
-
 scp -r frontend/ clouway@dev.telcong.com:/opt/telcong/bank
 
-ssh clouway@dev.telcong.com sudo stop startbank
+ssh clouway@dev.telcong.com sudo stop bank
 
-ssh clouway@dev.telcong.com sudo start startbank
+ssh clouway@dev.telcong.com sudo start bank

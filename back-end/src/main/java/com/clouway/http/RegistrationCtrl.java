@@ -21,7 +21,7 @@ public class RegistrationCtrl {
     private UserRepository repository;
     private SiteMap siteMap;
     private String error;
-    private user dtoUser = new user();
+    private DTOUser dtoUser = new DTOUser();
 
     @Inject
     public RegistrationCtrl(@Named("UserValidator") Validator validator, UserRepository repository, SiteMap siteMap) {
@@ -53,11 +53,11 @@ public class RegistrationCtrl {
         error = null;
     }
 
-    public void setDtoUser(user dtoUser) {
+    public void setDtoUser(DTOUser dtoUser) {
         this.dtoUser = dtoUser;
     }
 
-    public user getDtoUser() {
+    public DTOUser getDtoUser() {
         return dtoUser;
     }
 
