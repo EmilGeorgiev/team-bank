@@ -46,6 +46,7 @@ public class PersistentBankRepository implements BankRepository {
 
         BigDecimal newAmount = new BigDecimal(getBalance()).add(amount);
 
+
         BasicDBObject update = new BasicDBObject("$set", new BasicDBObject("amount", newAmount.toString()));
 
         bankAccounts().update(query, update);

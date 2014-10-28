@@ -1,36 +1,38 @@
 <div ng-controller="TransactionCtrl" align="center">
-    <form class="css-form">
-        <div class="btn-group btn-group-md">
-            <span style="color: #3333ff" ng-controller="NotificationCtrl">{{message}}</span>
-            <br/>
-            <div>Balance:</div>
 
-            <div>{{currentAmount}} $</div>
-            <div>
-                <form name="myform" ng-submit="create()">
-                    <input name="price_field"
+    <div class="container">
+        <div class="col-sm-4 col-sm-offset-4">
+            <form class="css-form" name="transaction" ng-submit="create()" novalidate>
+                <span style="color: #3333ff" ng-controller="NotificationCtrl">{{message}}</span>
+                <br/>
+
+                <div>Balance:</div>
+                <div>{{currentAmount}} $</div>
+                <div class="form-group">
+
+                    <input type="text"
+                           name="price_field"
                            class="form-control"
-                           placeholder="Enter amount"
                            ng-model="amount"
-                           require
+                           required
+                           placeholder="amount greater than 1"
                            ng-pattern="/^[1-9][0-9]*(\.[0-9]{1,2})?$/">
 
-                    <p></p>
-
-                    <div>
-                        <div>
-                            <button id="deposit" class="btn btn-primary btn-xs" type="button" ng-click="deposit(amount)"
-                                    >Deposit
-                            </button>
-
-                            <button id="withdraw" class="btn btn-primary btn-xs" type="button"
-                                    ng-click="withdraw(amount)"
-                                    >Withdraw
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+                    <button type="button"
+                            class="btn btn-primary btn-xs"
+                            ng-disabled="transaction.price_field.$invalid"
+                            ng-click="deposit(amount)">Deposit
+                    </button>
+                    <div class="divider"></div>
+                    <button type="button"
+                            class="btn btn-primary btn-xs"
+                            ng-disabled="transaction.price_field.$invalid"
+                            ng-click="withdraw(amount)">Withdraw
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
+
+
 </div>

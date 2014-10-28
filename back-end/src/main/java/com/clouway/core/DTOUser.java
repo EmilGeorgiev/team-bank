@@ -3,7 +3,7 @@ package com.clouway.core;
 /**
  * Created by clouway on 14-9-25.
  */
-public class user {
+public class DTOUser {
 
     private String username;
     private String password;
@@ -30,7 +30,7 @@ public class user {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        user user = (user) o;
+        DTOUser user = (DTOUser) o;
 
         if (password != null ? !password.equals(user.password) : user.password != null) return false;
         if (username != null ? !username.equals(user.username) : user.username != null) return false;
