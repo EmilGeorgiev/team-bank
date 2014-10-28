@@ -120,6 +120,6 @@ angular.module('transaction', ['ui.router'])
         function clear() {
             $timeout(function () {
                 $scope.message = "";
-            }, 2000);
+            }, 3000);
         }
     }]);
