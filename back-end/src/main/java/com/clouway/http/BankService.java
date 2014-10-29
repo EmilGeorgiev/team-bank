@@ -19,54 +19,55 @@ import java.math.BigDecimal;
  */
 @At("/amount")
 @Service
-@Singleton
 public class BankService {
 
-    private final BankRepository bankRepository;
-    private final Validator validator;
-    private final SiteMap siteMap;
+  private final BankRepository bankRepository;
+  private final Validator validator;
+  private final SiteMap siteMap;
 
-    @Inject
-    public BankService(BankRepository bankRepository, @Named("AmountValidator") Validator validator, SiteMap siteMap) {
+  @Inject
+  public BankService(BankRepository bankRepository, Validator<Amount> validator, SiteMap siteMap) {
 
-        this.bankRepository = bankRepository;
-        this.validator = validator;
-        this.siteMap = siteMap;
+    this.bankRepository = bankRepository;
+    this.validator = validator;
+    this.siteMap = siteMap;
+  }
+
+  @Get
+  public Reply<?> getCurrentAmount() {
+
+    String amount = bankRepository.getBalance().toString();
+
+    return Reply.with(amount).ok();
+  }
+
+  @Post
+  @At("/deposit")
+  public Reply<?> deposit(Request request) {
+
+    DTOAmount dtoAmount = request.read(DTOAmount.class).as(Json.class);
+
+    Amount amount = new Amount(dtoAmount.getAmount());
+
+    if (validator.isValid(amount)) {
+      TransactionStatus info = bankRepository.deposit(new BigDecimal(amount.getAmount()));
+      return Reply.with(info).as(Json.class);
     }
+    return Reply.with(siteMap.transactionError()).error();
+  }
 
-    @Get
-    public Reply<?> getCurrentAmount() {
+  @At("/withdraw")
+  @Post
+  public Reply<?> withdraw(Request request) {
 
-        return Reply.with(bankRepository.getBalance()).ok();
+    DTOAmount dtoAmount = request.read(DTOAmount.class).as(Json.class);
+
+    Amount amount = new Amount(dtoAmount.getAmount());
+
+    if (validator.isValid(amount)) {
+      TransactionStatus status = bankRepository.withdraw(new BigDecimal(amount.getAmount()));
+      return Reply.with(status).as(Json.class);
     }
-
-    @Post
-    @At("/deposit")
-    public Reply<?> deposit(Request request) {
-
-        DTOAmount dtoAmount = request.read(DTOAmount.class).as(Json.class);
-
-        Amount amount = new Amount(dtoAmount.getAmount());
-
-        if (validator.isValid(amount)) {
-            TransactionStatus info = bankRepository.deposit(new BigDecimal(amount.getAmount()));
-            return Reply.with(info).as(Json.class);
-        }
-        return Reply.with(siteMap.transactionError()).error();
-    }
-
-    @At("/withdraw")
-    @Post
-    public Reply<?> withdraw(Request request) {
-
-        DTOAmount dtoAmount = request.read(DTOAmount.class).as(Json.class);
-
-        Amount amount = new Amount(dtoAmount.getAmount());
-
-        if (validator.isValid(amount)) {
-            TransactionStatus status = bankRepository.withdraw(new BigDecimal(amount.getAmount()));
-            return Reply.with(status).as(Json.class);
-        }
-        return Reply.with(siteMap.transactionError()).error();
-    }
+    return Reply.with(siteMap.transactionError()).error();
+  }
 }

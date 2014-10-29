@@ -9,26 +9,27 @@ import com.mongodb.DBObject;
  * Created by emil on 14-9-25.
  */
 public class BankUtil {
-    private final DB db;
+  private final DB db;
 
-    public BankUtil(DB db) {
+  public BankUtil(DB db) {
 
-        this.db = db;
-    }
+    this.db = db;
+  }
 
-    /**
-     * Insert new client in database with some amount
-     * @param clientName name of the ne client
-     * @param amount amount of the new client
-     */
-    public void registerNewAccount(String clientName, String amount) {
-        DBObject query = new BasicDBObject("name", clientName)
-                .append("amount", amount);
+  /**
+   * Insert new client in database with some amount
+   *
+   * @param clientName name of the ne client
+   * @param amount     amount of the new client
+   */
+  public void registerNewAccount(String clientName, String amount) {
+    DBObject query = new BasicDBObject("name", clientName)
+            .append("amount", amount);
 
-        bankAccounts().insert(query);
-    }
+    bankAccounts().insert(query);
+  }
 
-    private DBCollection bankAccounts() {
-        return db.getCollection("bank_accounts");
-    }
+  private DBCollection bankAccounts() {
+    return db.getCollection("bank_accounts");
+  }
 }

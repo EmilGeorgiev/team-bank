@@ -22,151 +22,153 @@ import static org.hamcrest.core.Is.is;
  */
 public class BankServiceTest {
 
-    private BankService bankService;
-    private FakeRequestReader fakeRequestReader;
-    private TransactionStatus transactionStatus;
-    private DTOAmount dtoAmount = new DTOAmount();
-    private Amount amount;
+  private BankService bankService;
+  private FakeRequestReader fakeRequestReader;
+  private TransactionStatus transactionStatus;
+  private DTOAmount dtoAmount = new DTOAmount();
+  private Amount amount;
+  private BigDecimal bigDecimal;
 
-    @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    @Mock
-    private BankRepository bankRepository;
+  @Mock
+  private BankRepository bankRepository;
 
-    @Mock
-    private Request request;
+  @Mock
+  private Request request;
 
-    @Mock
-    private Validator validator;
+  @Mock
+  private Validator validator;
 
-    @Mock
-    private SiteMap siteMap;
+  @Mock
+  private SiteMap siteMap;
 
-    @Before
-    public void setUp() {
+  @Before
+  public void setUp() {
 
-        CurrentUser currentUser = new CurrentUser("Ivan");
+    CurrentUser currentUser = new CurrentUser("Ivan");
 
-        bankService = new BankService(bankRepository, validator, siteMap);
+    bankService = new BankService(bankRepository, validator, siteMap);
 
-        dtoAmount.setAmount("123");
+    dtoAmount.setAmount("123");
 
-        amount = new Amount(dtoAmount.getAmount());
+    amount = new Amount(dtoAmount.getAmount());
 
-        fakeRequestReader = new FakeRequestReader(dtoAmount);
+    fakeRequestReader = new FakeRequestReader(dtoAmount);
 
-        transactionStatus = new TransactionStatus(message("Success"), "100");
+    transactionStatus = new TransactionStatus(message("Success"), "100");
 
-    }
+  }
 
-    @Test
-    public void depositAmount() {
+  @Test
+  public void depositAmount() {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(request).read(DTOAmount.class);
-                will(returnValue(fakeRequestReader));
+    context.checking(new Expectations() {
+      {
+        oneOf(request).read(DTOAmount.class);
+        will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(amount);
-                will(returnValue(true));
+        oneOf(validator).isValid(amount);
+        will(returnValue(true));
 
-                oneOf(bankRepository).deposit(new BigDecimal(dtoAmount.getAmount()));
-                will(returnValue(transactionStatus));
-            }
-        });
+        oneOf(bankRepository).deposit(new BigDecimal(dtoAmount.getAmount()));
+        will(returnValue(transactionStatus));
+      }
+    });
 
-        Reply<?> reply = bankService.deposit(request);
+    Reply<?> reply = bankService.deposit(request);
 
-        assertThat(reply, contains(transactionStatus));
+    assertThat(reply, contains(transactionStatus));
 
-    }
+  }
 
-    @Test
-    public void failToDeposit() {
+  @Test
+  public void failToDeposit() {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(request).read(DTOAmount.class);
-                will(returnValue(fakeRequestReader));
+    context.checking(new Expectations() {
+      {
+        oneOf(request).read(DTOAmount.class);
+        will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(amount);
-                will(returnValue(false));
+        oneOf(validator).isValid(amount);
+        will(returnValue(false));
 
-                oneOf(siteMap).transactionError();
-                will(returnValue("error"));
-            }
-        });
-        Reply<?> reply = bankService.deposit(request);
-        assertThat(reply, contains("error"));
-    }
+        oneOf(siteMap).transactionError();
+        will(returnValue("error"));
+      }
+    });
+    Reply<?> reply = bankService.deposit(request);
+    assertThat(reply, contains("error"));
+  }
 
-    @Test
-    public void withdrawAmount() {
+  @Test
+  public void withdrawAmount() {
 
-        context.checking(new Expectations() {
-            {
+    context.checking(new Expectations() {
+      {
 
-                oneOf(request).read(DTOAmount.class);
-                will(returnValue(fakeRequestReader));
+        oneOf(request).read(DTOAmount.class);
+        will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(amount);
-                will(returnValue(true));
+        oneOf(validator).isValid(amount);
+        will(returnValue(true));
 
-                oneOf(bankRepository).withdraw(new BigDecimal(amount.getAmount()));
-                will(returnValue(transactionStatus));
-            }
-        });
+        oneOf(bankRepository).withdraw(new BigDecimal(amount.getAmount()));
+        will(returnValue(transactionStatus));
+      }
+    });
 
-        Reply<?> reply = bankService.withdraw(request);
+    Reply<?> reply = bankService.withdraw(request);
 
-        assertThat(reply, contains(transactionStatus));
-    }
+    assertThat(reply, contains(transactionStatus));
+  }
 
-    @Test
-    public void withdrawFailed() {
+  @Test
+  public void withdrawFailed() {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(request).read(DTOAmount.class);
-                will(returnValue(fakeRequestReader));
+    context.checking(new Expectations() {
+      {
+        oneOf(request).read(DTOAmount.class);
+        will(returnValue(fakeRequestReader));
 
-                oneOf(validator).isValid(amount);
-                will(returnValue(false));
+        oneOf(validator).isValid(amount);
+        will(returnValue(false));
 
-                oneOf(siteMap).transactionError();
-                will(returnValue("error"));
-            }
-        });
+        oneOf(siteMap).transactionError();
+        will(returnValue("error"));
+      }
+    });
 
-        Reply<?> reply = bankService.withdraw(request);
+    Reply<?> reply = bankService.withdraw(request);
 
-        assertThat(reply, contains("error"));
-    }
+    assertThat(reply, contains("error"));
+  }
 
-    @Test
-    public void getCurrentAmountOnUser() {
+  @Test
+  public void getCurrentAmountOnUser() {
 
-        context.checking(new Expectations() {
-            {
+    bigDecimal = new BigDecimal("5.1");
 
-                oneOf(bankRepository).getBalance();
-                will(returnValue("5.1"));
-            }
-        });
+    context.checking(new Expectations() {
+      {
+        oneOf(bankRepository).getBalance();
+        will(returnValue(bigDecimal));
+      }
+    });
 
-        Reply<?> reply = bankService.getCurrentAmount();
+    Reply<?> reply = bankService.getCurrentAmount();
 
-        assertThat(reply, contains("5.1"));
+    assertThat(reply, contains("5.1"));
 
-    }
+  }
 
-    private String message(String message) {
-        return message;
-    }
+  private String message(String message) {
+    return message;
+  }
 
-    private BigDecimal amount(BigDecimal amount) {
-        return amount;
-    }
+  private BigDecimal amount(BigDecimal amount) {
+    return amount;
+  }
 
 }

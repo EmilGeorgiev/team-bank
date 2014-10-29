@@ -6,9 +6,9 @@ import java.math.BigDecimal;
  * Created by emil on 14-9-25.
  */
 public interface BankRepository {
-    TransactionStatus deposit(BigDecimal amount);
+  TransactionStatus deposit(BigDecimal amount);
 
-    TransactionStatus withdraw(BigDecimal amount);
+  TransactionStatus withdraw(BigDecimal amount);
 
-    String getBalance();
+  BigDecimal getBalance();
 }

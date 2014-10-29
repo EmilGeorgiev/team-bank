@@ -1,7 +1,6 @@
 package com.clouway.http;
 
 import com.clouway.core.*;
-import com.google.common.base.Optional;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -23,76 +22,75 @@ import static org.hamcrest.core.Is.is;
  */
 public class LoginCtrlTest {
 
-    @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    private User user;
-    private LoginCtrl loginCtrl;
-    private FakeHttpResponse response;
+  private User user;
+  private LoginCtrl loginCtrl;
+  private FakeHttpResponse response;
 
-    @Mock
-    UserRepository userRepository;
+  @Mock
+  UserRepository userRepository;
 
-    @Mock
-    SessionRepository sessionRepository;
+  @Mock
+  SessionRepository sessionRepository;
 
-    @Mock
-    IdGenerator idGenerator;
+  @Mock
+  IdGenerator idGenerator;
 
-    @Mock
-    SiteMap siteMap;
+  @Mock
+  SiteMap siteMap;
 
-    @Before
-    public void setUp() {
+  @Before
+  public void setUp() {
 
-        loginCtrl = new LoginCtrl(userRepository, sessionRepository, idGenerator, siteMap);
+    loginCtrl = new LoginCtrl(userRepository, sessionRepository, siteMap);
 
-        DTOUser dtoUser = loginCtrl.getDtoUser();
-        dtoUser.setUsername("username");
-        dtoUser.setPassword("password");
+    DTOUser dtoUser = loginCtrl.getDtoUser();
+    dtoUser.setUsername("username");
+    dtoUser.setPassword("password");
 
-        user = new User("username", "password");
+    user = new User("username", "password");
 
-        response = new FakeHttpResponse() {
-            @Override
-            public void addCookie(Cookie cookie) {
-                super.addCookie(cookie);
-            }
-        };
-    }
+    response = new FakeHttpResponse() {
+      @Override
+      public void addCookie(Cookie cookie) {
+        super.addCookie(cookie);
+      }
+    };
+  }
 
-    @Test
-    public void authenticate() throws ServletException, IOException {
+  @Test
+  public void authenticate() throws ServletException, IOException {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(userRepository).find(user);
-                will(returnValue(Optional.of(user)));
+    context.checking(new Expectations() {
+      {
+        oneOf(userRepository).login(user);
+        will(returnValue(true));
 
-                oneOf(idGenerator).generateFor(user);
-                will(returnValue("sessionId"));
+        oneOf(siteMap).sessionCookieName();
+        will(returnValue("sId"));
 
-                oneOf(siteMap).sessionCookieName();
-                will(returnValue("sId"));
+        oneOf(sessionRepository).create(user.getName());
+        will(returnValue("123"));
 
-                oneOf(sessionRepository).addNewSession(user.getName(), "sessionId");
-            }
-        });
-        assertThat(loginCtrl.authenticate(response), is("/"));
-    }
+      }
+    });
+    assertThat(loginCtrl.authenticate(response), is("/"));
+  }
 
-    @Test
-    public void loginFailed() throws ServletException, IOException {
+  @Test
+  public void loginFailed() throws ServletException, IOException {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(userRepository).find(user);
-                will(returnValue(Optional.absent()));
+    context.checking(new Expectations() {
+      {
+        oneOf(userRepository).login(user);
+        will(returnValue(false));
 
-                oneOf(siteMap).loginFailed();
-                will(returnValue("Error"));
-            }
-        });
-        assertThat(loginCtrl.authenticate(response), nullValue());
-    }
+        oneOf(siteMap).loginFailed();
+        will(returnValue("Error"));
+      }
+    });
+    assertThat(loginCtrl.authenticate(response), nullValue());
+  }
 }

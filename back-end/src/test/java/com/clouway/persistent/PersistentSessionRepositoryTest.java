@@ -1,5 +1,6 @@
 package com.clouway.persistent;
 
+import com.clouway.core.IdGenerator;
 import com.clouway.core.Session;
 import com.clouway.core.User;
 import com.clouway.persistent.util.CalendarUtil;
@@ -8,11 +9,14 @@ import com.google.inject.util.Providers;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
+import org.jmock.Expectations;
+import org.jmock.auto.Mock;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.net.UnknownHostException;
-import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -21,53 +25,74 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 public class PersistentSessionRepositoryTest {
 
-    private PersistentSessionRepository persistentSessionRepository;
-    private DB db;
-    private User user;
-    private Session session;
-    private CalendarUtil calendarUtil = new CalendarUtil(2014, 10, 27, 10, 30, 20);
+  private PersistentSessionRepository persistentSessionRepository;
+  private DB database;
+  private User user;
+  private Session session;
+  private CalendarUtil calendarUtil = new CalendarUtil(2014, 10, 27, 10, 30, 20);
 
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
+  @Mock
+  private IdGenerator idGenerator;
 
-    @Before
-    public void setUp() throws UnknownHostException {
+  @Before
+  public void setUp() throws UnknownHostException {
 
-        MongoClient mongoClient = new MongoClient();
+    MongoClient mongoClient = new MongoClient();
 
-        session = new Session("username", "sessionID", calendarUtil.now());
+    session = new Session("username", "sessionID", calendarUtil.nowPlus(60000l));
 
-        user = new User("username", "password");
+    user = new User("username", "password");
 
-        db = mongoClient.getDB("team-bank-test");
+    database = mongoClient.getDB("team-bank-test");
 
-        persistentSessionRepository = new PersistentSessionRepository(Providers.of(db), calendarUtil);
+    persistentSessionRepository = new PersistentSessionRepository(Providers.of(database), calendarUtil, 60000l, idGenerator);
 
-        sessions().drop();
-    }
+    sessions().drop();
+  }
 
-    @Test
-    public void addNewSessionToSessionRepo() {
+  @Test
+  public void addNewSessionToSessionRepo() {
 
-        persistentSessionRepository.addNewSession(user.getName(), session.getSessionId());
+    context.checking(new Expectations() {
+      {
 
-        Session session = persistentSessionRepository.find("sessionID").get();
+        oneOf(idGenerator).generateId();
+        will(returnValue("sessionID"));
+      }
+    });
 
-        assertThat(session.getUsername(), is("username"));
-        assertThat(session.getSessionId(), is("sessionID"));
-    }
+    persistentSessionRepository.create(user.getName());
 
-    @Test
-    public void removeUserSession() {
-        persistentSessionRepository.addNewSession(user.getName(), session.getSessionId());
+    Session session = persistentSessionRepository.find("sessionID").get();
 
-        persistentSessionRepository.remove(session.getSessionId());
+    assertThat(session.getUsername(), is("username"));
+    assertThat(session.getSessionId(), is("sessionID"));
+  }
 
-        Optional<Session> session = persistentSessionRepository.find("sessionID");
+  @Test
+  public void removeUserSession() {
 
-        assertThat(session.isPresent(), is(false));
-    }
+    context.checking(new Expectations() {
+      {
 
-    private DBCollection sessions() {
-        return db.getCollection("sessions");
-    }
+        oneOf(idGenerator).generateId();
+        will(returnValue("sessionID"));
+      }
+    });
+
+    persistentSessionRepository.create(user.getName());
+
+    persistentSessionRepository.remove(session.getSessionId());
+
+    Optional<Session> session = persistentSessionRepository.find("sessionID");
+
+    assertThat(session.isPresent(), is(false));
+  }
+
+  private DBCollection sessions() {
+    return database.getCollection("sessions");
+  }
 }

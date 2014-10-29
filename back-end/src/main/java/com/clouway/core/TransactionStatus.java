@@ -4,32 +4,32 @@ package com.clouway.core;
  * Created by emil on 14-9-25.
  */
 public class TransactionStatus {
-    public final String message;
-    public final String amount;
+  public final String message;
+  public final String amount;
 
-    public TransactionStatus(String message, String amount) {
+  public TransactionStatus(String message, String amount) {
 
-        this.message = message;
-        this.amount = amount;
-    }
+    this.message = message;
+    this.amount = amount;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-        TransactionStatus that = (TransactionStatus) o;
+    TransactionStatus that = (TransactionStatus) o;
 
-        if (amount != null ? !amount.equals(that.amount) : that.amount != null) return false;
-        if (message != null ? !message.equals(that.message) : that.message != null) return false;
+    if (amount != null ? !amount.equals(that.amount) : that.amount != null) return false;
+    if (message != null ? !message.equals(that.message) : that.message != null) return false;
 
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public int hashCode() {
-        int result = message != null ? message.hashCode() : 0;
-        result = 31 * result + (amount != null ? amount.hashCode() : 0);
-        return result;
-    }
+  @Override
+  public int hashCode() {
+    int result = message != null ? message.hashCode() : 0;
+    result = 31 * result + (amount != null ? amount.hashCode() : 0);
+    return result;
+  }
 }

@@ -4,6 +4,7 @@ import com.clouway.core.CurrentUser;
 import com.clouway.core.TransactionStatus;
 import com.clouway.core.TransactionMessages;
 import com.clouway.persistent.util.BankUtil;
+import com.google.common.base.Optional;
 import com.google.inject.util.Providers;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -22,103 +23,108 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class PersistentBankRepositoryTest {
 
-    private PersistentBankRepository persistentBankRepository;
-    private BankUtil bankUtil;
-    private DB db;
+  private PersistentBankRepository persistentBankRepository;
+  private BankUtil bankUtil;
+  private DB db;
 
-    private TransactionMessages transactionMessages = new TransactionMessages() {
-        @Override
-        public String onSuccess() {
-            return "Success";
-        }
-
-        @Override
-        public String onFailuer() {
-            return "Failed";
-        }
-    };
-
-
-    @Before
-    public void setUp() throws UnknownHostException {
-        MongoClient mongoClient = new MongoClient();
-
-        db = mongoClient.getDB("team-bank-test");
-
-        CurrentUser currentUser = new CurrentUser("Ivan");
-
-        persistentBankRepository = new PersistentBankRepository(Providers.of(db),
-                Providers.of(currentUser), transactionMessages);
-
-        bankUtil = new BankUtil(db);
-
-        bankAccounts().drop();
+  private TransactionMessages transactionMessages = new TransactionMessages() {
+    @Override
+    public String onSuccess() {
+      return "Success";
     }
 
-
-    @Test
-    public void depositAmount() throws Exception {
-
-        pretendThat(clientName("Ivan"), amount("100"));
-
-        TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(20));
-
-        assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("120"));
-
+    @Override
+    public String amountIsGreater() {
+      return "Failed";
     }
 
-
-    @Test
-    public void makeTwoDepositTransactions() throws Exception {
-
-        pretendThat(clientName("Ivan"), amount("100"));
-
-        persistentBankRepository.deposit(BigDecimal.valueOf(20));
-        TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(80));
-
-        assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("200"));
-
+    @Override
+    public String noSuchUser() {
+      return "No such user";
     }
+  };
 
-    @Test
-    public void withdrawAmount() throws Exception {
 
-        pretendThat(clientName("Ivan"), amount("200"));
+  @Before
+  public void setUp() throws UnknownHostException {
+    MongoClient mongoClient = new MongoClient();
 
-        TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(120));
+    db = mongoClient.getDB("team-bank-test");
 
-        assertThat(info.message, is("Success"));
-        assertThat(info.amount, is("80"));
+    Optional<CurrentUser> currentUser = Optional.of(new CurrentUser("Ivan"));
 
-    }
+    persistentBankRepository = new PersistentBankRepository(Providers.of(db),
+            Providers.of(currentUser), transactionMessages);
 
-    @Test
-    public void withdrawMoreThanWeHave() throws Exception {
+    bankUtil = new BankUtil(db);
 
-        pretendThat(clientName("Ivan"), amount("100"));
+    bankAccounts().drop();
+  }
 
-        TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(200));
 
-        assertThat(info.message, is("Failed"));
-        assertThat(info.amount, is("100"));
+  @Test
+  public void depositAmount() throws Exception {
 
-    }
+    pretendThat(clientName("Ivan"), amount("100"));
 
-    private void pretendThat(String clientName, String amount) {
-        bankUtil.registerNewAccount(clientName, amount);
-    }
+    TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(20));
 
-    private String clientName(String name) {
-        return name;
-    }
+    assertThat(info.message, is("Success"));
+    assertThat(info.amount, is("120"));
 
-    private String amount(String amount) {
-        return amount;
-    }
+  }
 
-    private DBCollection bankAccounts() {
-        return db.getCollection("bank_accounts");
-    }
+
+  @Test
+  public void makeTwoDepositTransactions() throws Exception {
+
+    pretendThat(clientName("Ivan"), amount("100"));
+
+    persistentBankRepository.deposit(BigDecimal.valueOf(20));
+    TransactionStatus info = persistentBankRepository.deposit(BigDecimal.valueOf(80));
+
+    assertThat(info.message, is("Success"));
+    assertThat(info.amount, is("200"));
+
+  }
+
+  @Test
+  public void withdrawAmount() throws Exception {
+
+    pretendThat(clientName("Ivan"), amount("200"));
+
+    TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(120));
+
+    assertThat(info.message, is("Success"));
+    assertThat(info.amount, is("80"));
+
+  }
+
+  @Test
+  public void withdrawMoreThanWeHave() throws Exception {
+
+    pretendThat(clientName("Ivan"), amount("100"));
+
+    TransactionStatus info = persistentBankRepository.withdraw(BigDecimal.valueOf(200));
+
+    assertThat(info.message, is("Failed"));
+    assertThat(info.amount, is("100"));
+
+  }
+
+  private void pretendThat(String clientName, String amount) {
+    bankUtil.registerNewAccount(clientName, amount);
+  }
+
+  private String clientName(String name) {
+    return name;
+  }
+
+  private String amount(String amount) {
+    return amount;
+  }
+
+  private DBCollection bankAccounts() {
+    return db.getCollection("bank_accounts");
+  }
 }

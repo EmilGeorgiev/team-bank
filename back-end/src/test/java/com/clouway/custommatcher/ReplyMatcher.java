@@ -13,42 +13,43 @@ import java.lang.reflect.Field;
 public class ReplyMatcher {
 
 
-    /**
-     * Equals contain on the <code>Reply</code> with given object.
-     * @param expected object who check whether is contain in Reply.
-     * @param <T>
-     * @return
-     */
-    public static <T> Matcher contains(final T expected) {
+  /**
+   * Equals contain on the <code>Reply</code> with given object.
+   *
+   * @param expected object who check whether is contain in Reply.
+   * @param <T>
+   * @return
+   */
+  public static <T> Matcher contains(final T expected) {
 
-        return new TypeSafeMatcher<Reply<?>>() {
-            @Override
-            public boolean matchesSafely(Reply<?> actual) {
+    return new TypeSafeMatcher<Reply<?>>() {
+      @Override
+      public boolean matchesSafely(Reply<?> actual) {
 
-                Class clazz = actual.getClass();
+        Class clazz = actual.getClass();
 
-                Field field;
+        Field field;
 
-                try {
-                    field = clazz.getDeclaredField("entity");
+        try {
+          field = clazz.getDeclaredField("entity");
 
-                    field.setAccessible(true);
+          field.setAccessible(true);
 
-                    T actual1 = (T) field.get(actual);
+          T actual1 = (T) field.get(actual);
 
-                    return actual1.equals(expected);
+          return actual1.equals(expected);
 
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+          e.printStackTrace();
+        }
 
-                return false;
-            }
+        return false;
+      }
 
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(expected.toString());
-            }
-        };
-    }
- }
+      @Override
+      public void describeTo(Description description) {
+        description.appendText(expected.toString());
+      }
+    };
+  }
+}

@@ -4,123 +4,124 @@ import com.clouway.core.*;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * Created by emil on 14-9-26.
  */
-@Singleton
-public class PersistentSessionRepository implements SessionRepository {
+class PersistentSessionRepository implements SessionRepository {
 
-    private DB db;
-    private Clock clock;
+  private DB db;
+  private Clock clock;
+  private final Long miliseconds;
+  private final IdGenerator idGenerator;
 
-    @Inject
-    public PersistentSessionRepository(Provider<DB> dbProvider, Clock clock) {
+  public PersistentSessionRepository(Provider<DB> dbProvider, Clock clock, Long miliseconds, IdGenerator idGenerator) {
 
-        this.clock = clock;
-        this.db = dbProvider.get();
+    this.clock = clock;
+    this.miliseconds = miliseconds;
+    this.idGenerator = idGenerator;
+    this.db = dbProvider.get();
+  }
+
+  @Override
+  public Optional<CurrentUser> findUser(String sessionId) {
+
+    DBObject criteria = new BasicDBObject("sessionId", sessionId);
+
+    DBObject projection = new BasicDBObject("username", 1);
+
+    BasicDBObject username = (BasicDBObject) sessions().findOne(criteria, projection);
+
+    if (username != null) {
+      return Optional.of(new CurrentUser(username.getString("username")));
     }
 
-    @Override
-    public CurrentUser findUserBy(String sessionId) {
+    return Optional.absent();
+  }
 
-        DBObject criteria = new BasicDBObject("sessionId", sessionId);
+  @Override
+  public String create(String username) {
 
-        DBObject projection = new BasicDBObject("username", 1);
+    String sessionId = idGenerator.generateId();
 
-        BasicDBObject username = (BasicDBObject) sessions().findOne(criteria, projection);
+    DBObject query = new BasicDBObject("username", username)
 
-        return new CurrentUser(username.getString("username"));
+            .append("sessionId", sessionId)
+            .append("expirationTime", clock.nowPlus(miliseconds));
+
+    sessions().createIndex(new BasicDBObject("expirationTime", 1));
+
+    sessions().insert(query);
+
+    return sessionId;
+  }
+
+
+  @Override
+  public void remove(String sessionId) {
+
+    BasicDBObject query = new BasicDBObject();
+
+    query.append("sessionId", sessionId);
+
+    sessions().remove(query);
+  }
+
+  @Override
+  public Optional<Session> find(String sessionId) {
+
+    BasicDBObject query = new BasicDBObject("sessionId", sessionId);
+
+    BasicDBObject fields = new BasicDBObject("username", 1)
+            .append("sessionId", 1)
+            .append("expirationTime", 1);
+
+    BasicDBObject dbObject = (BasicDBObject) sessions().findOne(query, fields);
+
+    if (dbObject != null) {
+      return Optional.of(new Session(dbObject.getString("username"),
+              dbObject.getString("sessionId"),
+              dbObject.getDate("expirationTime")));
     }
 
-    @Override
-    public void addNewSession(String username, String sessionId) {
+    return Optional.absent();
+  }
 
-        Date date = getDateExpired(clock.now());
+  @Override
+  public void renewExpirationDate(String sessionID) {
 
-        DBObject query = new BasicDBObject("username", username)
+    DBObject query = new BasicDBObject("sessionId", sessionID);
 
-                .append("sessionId", sessionId)
-                .append("expirationTime", date);
+    DBObject update = new BasicDBObject("$set", new BasicDBObject("expirationTime", clock.nowPlus(miliseconds)));
 
-        sessions().createIndex(new BasicDBObject("expirationTime", 1), new BasicDBObject("expireAfterSeconds", 0));
+    sessions().update(query, update);
+  }
 
-        sessions().insert(query);
+  @Override
+  public boolean isSessionExpired(String sessionID) {
+
+    DBObject query = new BasicDBObject("sessionId", sessionID);
+
+    DBObject projection = new BasicDBObject("expirationTime", 1);
+
+    BasicDBObject dbObject = (BasicDBObject) sessions().findOne(query, projection);
+
+    if (dbObject == null) {
+      return true;
     }
 
-
-
-    @Override
-    public void remove(String sessionId) {
-
-        BasicDBObject query = new BasicDBObject();
-
-        query.append("sessionId", sessionId);
-
-        sessions().remove(query);
+    if (dbObject.getDate("expirationTime").compareTo(clock.now()) > 0) {
+      return false;
     }
 
-    @Override
-    public Optional<Session> find(String sessionId) {
+    return true;
+  }
 
-        BasicDBObject query = new BasicDBObject("sessionId", sessionId);
-
-        BasicDBObject fields = new BasicDBObject();
-
-        fields.put("username", 1);
-        fields.put("sessionId", 2);
-        fields.put("expirationTime", 3);
-
-        BasicDBObject dbObject = (BasicDBObject) sessions().findOne(query, fields);
-
-        if (!Optional.fromNullable(dbObject).isPresent()) {
-            return Optional.absent();
-        }
-
-        return Optional.fromNullable(new Session(dbObject.getString("username"),
-                dbObject.getString("sessionId"), dbObject.getDate("expirationTime")));
-    }
-
-    @Override
-    public void updateSession(String sessionID) {
-        Date date = getDateExpired(clock.now());
-
-        DBObject query = new BasicDBObject("sessionId", sessionID);
-
-        DBObject update = new BasicDBObject("$set", new BasicDBObject("expirationTime", date));
-
-        sessions().update(query, update);
-
-    }
-
-    @Override
-    public void removeSessionOn(String username) {
-
-        DBObject query = new BasicDBObject("username", username);
-
-        sessions().remove(query);
-    }
-
-    private Date getDateExpired(Date date) {
-
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.setTime(date);
-
-        calendar.add(Calendar.MINUTE, 60);
-
-        return calendar.getTime();
-    }
-
-    private DBCollection sessions() {
-        return db.getCollection("sessions");
-    }
+  private DBCollection sessions() {
+    return db.getCollection("sessions");
+  }
 }

@@ -1,6 +1,7 @@
-body{
+body {
     background-color: powderblue;
 }
+
 .btn3d {
     position: relative;
     border: 0;
@@ -15,6 +16,7 @@ h3 {
     font-style: italic;
     font-family: fantasy
 }
-hr{
+
+hr {
     border: inset
 }

@@ -19,67 +19,67 @@ import java.util.Set;
 @Singleton
 public class SecurityFilter implements Filter {
 
-    private final SiteMap siteMap;
-    private final Provider<Set<String>> setProvider;
-    private final SessionRepository sessionRepository;
+  private final SiteMap siteMap;
+  private final Provider<Set<String>> setProvider;
+  private final SessionRepository sessionRepository;
 
-    @Inject
-    public SecurityFilter(SiteMap siteMap, Provider<Set<String>> setProvider, SessionRepository sessionRepository) {
+  @Inject
+  public SecurityFilter(SiteMap siteMap, Provider<Set<String>> setProvider, SessionRepository sessionRepository) {
 
-        this.siteMap = siteMap;
-        this.setProvider = setProvider;
-        this.sessionRepository = sessionRepository;
-    }
+    this.siteMap = siteMap;
+    this.setProvider = setProvider;
+    this.sessionRepository = sessionRepository;
+  }
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
 
-    }
+  }
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+  @Override
+  public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
 
-        String uri = request.getRequestURI();
+    String uri = request.getRequestURI();
 
-        for(String resource: setProvider.get()) {
-            if(uri.contains(resource)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-        }
-
-        String sessionID = null;
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for(Cookie cookie : cookies) {
-                if("sid".equals(cookie.getName())) {
-                    sessionID = cookie.getValue();
-                }
-            }
-        }
-
-        if (!sessionRepository.find(sessionID).isPresent()) {
-            if (uri.contains("amount")) {
-
-                response.setStatus(401);
-                return;
-            }
-            response.sendRedirect(siteMap.loginPage());
-            return;
-        }
-
-        sessionRepository.updateSession(sessionID);
-
+    for (String resource : setProvider.get()) {
+      if (uri.contains(resource)) {
         filterChain.doFilter(request, response);
+        return;
+      }
     }
 
-    @Override
-    public void destroy() {
+    String sessionID = null;
 
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if ("sid".equals(cookie.getName())) {
+          sessionID = cookie.getValue();
+        }
+      }
     }
+
+    if (sessionRepository.isSessionExpired(sessionID)) {
+      if (uri.contains("amount")) {
+
+        response.setStatus(401);
+        return;
+      }
+      response.sendRedirect(siteMap.loginPage());
+      return;
+    }
+
+    sessionRepository.renewExpirationDate(sessionID);
+
+    filterChain.doFilter(request, response);
+  }
+
+  @Override
+  public void destroy() {
+
+  }
 }

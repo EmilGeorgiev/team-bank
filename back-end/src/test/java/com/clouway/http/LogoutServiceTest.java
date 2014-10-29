@@ -21,43 +21,43 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class LogoutServiceTest {
 
-    private LogoutService logoutService;
-    private Session session;
+  private LogoutService logoutService;
+  private Session session;
 
-    @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    @Mock
-    SessionRepository sessionRepository;
+  @Mock
+  SessionRepository sessionRepository;
 
-    @Mock
-    SiteMap siteMap;
+  @Mock
+  SiteMap siteMap;
 
 
-    @Before
-    public void setUp() {
+  @Before
+  public void setUp() {
 
-        String username = "Stanislav";
-        String sessionId = "sessionId";
-        Date expirationTime = new Date();
+    String username = "Stanislav";
+    String sessionId = "sessionId";
+    Date expirationTime = new Date();
 
-        session = new Session(username, sessionId, expirationTime);
+    session = new Session(username, sessionId, expirationTime);
 
-        logoutService = new LogoutService(sessionRepository, Providers.of(session), siteMap);
-    }
+    logoutService = new LogoutService(sessionRepository, Providers.of(session), siteMap);
+  }
 
-    @Test
-    public void logoutFromSystem() throws NoSuchFieldException, IllegalAccessException {
+  @Test
+  public void logoutFromSystem() throws NoSuchFieldException, IllegalAccessException {
 
-        context.checking(new Expectations() {
-            {
-                oneOf(sessionRepository).remove(session.getSessionId());
+    context.checking(new Expectations() {
+      {
+        oneOf(sessionRepository).remove(session.getSessionId());
 
-                oneOf(siteMap).loginPage();
-                will(returnValue("/login"));
-            }
-        });
+        oneOf(siteMap).loginPage();
+        will(returnValue("/login"));
+      }
+    });
 
-        assertThat(logoutService.logout(), contains("/login"));
-    }
+    assertThat(logoutService.logout(), contains("/login"));
+  }
 }

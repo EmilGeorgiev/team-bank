@@ -18,32 +18,31 @@ import com.google.sitebricks.http.Post;
  */
 @At("/logout")
 @Service
-@Singleton
 public class LogoutService {
 
-    private SessionRepository sessionRepository;
+  private SessionRepository sessionRepository;
 
 
-    private final Provider<Session> currentSessionProvider;
-    private SiteMap siteMap;
+  private final Provider<Session> currentSessionProvider;
+  private SiteMap siteMap;
 
-    @Inject
-    public LogoutService(SessionRepository sessionRepository, Provider<Session> currentSessionProvider, SiteMap siteMap) {
-        this.sessionRepository = sessionRepository;
-        this.currentSessionProvider = currentSessionProvider;
-        this.siteMap = siteMap;
+  @Inject
+  public LogoutService(SessionRepository sessionRepository, Provider<Session> currentSessionProvider, SiteMap siteMap) {
+    this.sessionRepository = sessionRepository;
+    this.currentSessionProvider = currentSessionProvider;
+    this.siteMap = siteMap;
+  }
+
+  @Post
+  public Reply<?> logout() {
+
+    Session session = currentSessionProvider.get();
+
+    if (session != null) {
+
+      sessionRepository.remove(session.getSessionId());
     }
 
-    @Post
-    public Reply<?> logout() {
-
-        Session session = currentSessionProvider.get();
-
-        if(session != null) {
-
-            sessionRepository.remove(session.getSessionId());
-        }
-
-        return Reply.with(siteMap.loginPage()).ok();
-    }
+    return Reply.with(siteMap.loginPage()).ok();
+  }
 }

@@ -23,7 +23,7 @@ angular.module('team-bank', [
         };
     }])
 
-    .controller("LogoutCtrl", ["$scope", 'windowService','logoutService', function ($scope, windowService, logoutService) {
+    .controller("LogoutCtrl", ["$scope", 'windowService', 'logoutService', function ($scope, windowService, logoutService) {
 
         $scope.logout = function () {
             logoutService.logout().then(function () {

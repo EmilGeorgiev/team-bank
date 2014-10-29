@@ -9,32 +9,32 @@ import org.hamcrest.Matcher;
  */
 public class CapturingMatcher<T> extends BaseMatcher<T> {
 
-    private final Matcher<T> baseMatcher;
+  private final Matcher<T> baseMatcher;
 
-    private Object captureArgument;
+  private Object captureArgument;
 
-    public CapturingMatcher(Matcher<T> baseMatcher) {
-        this.baseMatcher = baseMatcher;
-    }
+  public CapturingMatcher(Matcher<T> baseMatcher) {
+    this.baseMatcher = baseMatcher;
+  }
 
 
-    @Override
-    public boolean matches(Object item) {
+  @Override
+  public boolean matches(Object item) {
 
-        captureArgument = item;
+    captureArgument = item;
 
-        return baseMatcher.matches(captureArgument);
+    return baseMatcher.matches(captureArgument);
 
-    }
+  }
 
-    @Override
-    public void describeTo(Description description) {
-        baseMatcher.describeTo(description);
-    }
+  @Override
+  public void describeTo(Description description) {
+    baseMatcher.describeTo(description);
+  }
 
-    public Object getCaptureArgument() {
-        return captureArgument;
-    }
+  public Object getCaptureArgument() {
+    return captureArgument;
+  }
 
 
 }

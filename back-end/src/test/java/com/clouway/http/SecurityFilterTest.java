@@ -24,120 +24,121 @@ import java.util.Set;
 
 public class SecurityFilterTest {
 
-    private SecurityFilter securityFilter;
-    private Session session;
-    private Set<String> unsecureResources = new HashSet<>();
-    private Cookie[] cookies;
+  private SecurityFilter securityFilter;
+  private Session session;
+  private Set<String> unsecureResources = new HashSet<>();
+  private Cookie[] cookies;
 
 
-    @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    @Mock
-    private HttpServletRequest request;
+  @Mock
+  private HttpServletRequest request;
 
-    @Mock
-    private FilterChain filterChain;
+  @Mock
+  private FilterChain filterChain;
 
-    @Mock
-    private HttpServletResponse response;
+  @Mock
+  private HttpServletResponse response;
 
-    @Mock
-    private SiteMap siteMap;
+  @Mock
+  private SiteMap siteMap;
 
-    @Mock
-    private SessionRepository sessionRepository;
+  @Mock
+  private SessionRepository sessionRepository;
 
-    @Before
-    public void setUp() {
+  @Before
+  public void setUp() {
 
-        unsecureResources.add("/login");
-        unsecureResources.add("/registration");
-        unsecureResources.add("/logout");
+    unsecureResources.add("/login");
+    unsecureResources.add("/registration");
+    unsecureResources.add("/logout");
 
-        cookies = new Cookie[]{new Cookie("sid", "123")};
+    cookies = new Cookie[]{new Cookie("sid", "123")};
 
-        securityFilter = new SecurityFilter(siteMap, Providers.of(unsecureResources), sessionRepository);
+    securityFilter = new SecurityFilter(siteMap, Providers.of(unsecureResources), sessionRepository);
 
-    }
+  }
 
-    @Test
-    public void sessionIsNotExpired() throws IOException, ServletException {
+  @Test
+  public void sessionIsNotExpired() throws IOException, ServletException {
 
-        final CapturingMatcher<Cookie[]> capturingMatcher =
-                new CapturingMatcher<>(Expectations.any(Cookie[].class));
+    final CapturingMatcher<Cookie[]> capturingMatcher =
+            new CapturingMatcher<>(Expectations.any(Cookie[].class));
 
 
-        context.checking(new Expectations() {
-            {
+    context.checking(new Expectations() {
+      {
 
-                oneOf(request).getRequestURI();
-                will(returnValue("/"));
+        oneOf(request).getRequestURI();
+        will(returnValue("/"));
 
-                oneOf(request).getCookies();
-                will(returnValue(cookies));
+        oneOf(request).getCookies();
+        will(returnValue(cookies));
 
-                oneOf(sessionRepository).find(sessionID("123"));
-                will(returnValue(Optional.of(Session.class)));
+        oneOf(sessionRepository).isSessionExpired(sessionID("123"));
+        will(returnValue(false));
 
-                oneOf(sessionRepository).updateSession("123");
+        oneOf(sessionRepository).renewExpirationDate("123");
 
-                oneOf(filterChain).doFilter(request, response);
-            }
-        });
+        oneOf(filterChain).doFilter(request, response);
+      }
+    });
 
-        securityFilter.doFilter(request, response, filterChain);
+    securityFilter.doFilter(request, response, filterChain);
 
-    }
+  }
 
-    @Test
-    public void sessionIsExpired() throws IOException, ServletException {
+  @Test
+  public void sessionIsExpired() throws IOException, ServletException {
 
-        context.checking(new Expectations() {
-            {
+    context.checking(new Expectations() {
+      {
 
-                oneOf(request).getRequestURI();
-                will(returnValue("/"));
+        oneOf(request).getRequestURI();
+        will(returnValue("/"));
 
-                oneOf(request).getCookies();
-                will(returnValue(cookies));
+        oneOf(request).getCookies();
+        will(returnValue(cookies));
 
-                oneOf(sessionRepository).find(sessionID("123"));
-                will(returnValue(Optional.absent()));
+        oneOf(sessionRepository).isSessionExpired(sessionID("123"));
+        will(returnValue(true));
 
-                oneOf(siteMap).loginPage();
-                will(returnValue("/login"));
+        oneOf(siteMap).loginPage();
+        will(returnValue("/login"));
 
-                oneOf(response).sendRedirect("/login");
-            }
-        });
+        oneOf(response).sendRedirect("/login");
+      }
+    });
 
-        securityFilter.doFilter(request, response, filterChain);
+    securityFilter.doFilter(request, response, filterChain);
 
-    }
+  }
 
-    @Test
-    public void sessionIsExpiredAndRequestURIContainsAmount() throws Exception {
+  @Test
+  public void sessionIsExpiredAndRequestURIContainsAmount() throws Exception {
 
-        context.checking(new Expectations() {{
-            oneOf(request).getRequestURI();
-            will(returnValue("/amount"));
+    context.checking(new Expectations() {
+      {
+        oneOf(request).getRequestURI();
+        will(returnValue("/amount"));
 
-            oneOf(request).getCookies();
-            will(returnValue(cookies));
+        oneOf(request).getCookies();
+        will(returnValue(cookies));
 
-            oneOf(sessionRepository).find(sessionID("123"));
-            will(returnValue(Optional.absent()));
+        oneOf(sessionRepository).isSessionExpired(sessionID("123"));
+        will(returnValue(true));
 
-            oneOf(response).setStatus(401);
-        }
-        });
+        oneOf(response).setStatus(401);
+      }
+    });
 
-        securityFilter.doFilter(request, response, filterChain);
+    securityFilter.doFilter(request, response, filterChain);
 
-    }
+  }
 
-    private String sessionID(String sessionID) {
-        return sessionID;
-    }
+  private String sessionID(String sessionID) {
+    return sessionID;
+  }
 }

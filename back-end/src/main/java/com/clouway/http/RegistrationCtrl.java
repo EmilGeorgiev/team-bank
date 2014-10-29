@@ -14,54 +14,53 @@ import com.google.sitebricks.http.Post;
  */
 @At("/registration")
 @Show("registration.html")
-@Singleton
 public class RegistrationCtrl {
 
-    private Validator validator;
-    private UserRepository repository;
-    private SiteMap siteMap;
-    private String error;
-    private DTOUser dtoUser = new DTOUser();
+  private Validator validator;
+  private UserRepository repository;
+  private SiteMap siteMap;
+  private String error;
+  private DTOUser dtoUser = new DTOUser();
 
-    @Inject
-    public RegistrationCtrl(@Named("UserValidator") Validator validator, UserRepository repository, SiteMap siteMap) {
+  @Inject
+  public RegistrationCtrl(Validator<User> validator, UserRepository repository, SiteMap siteMap) {
 
-        this.validator = validator;
-        this.repository = repository;
-        this.siteMap = siteMap;
+    this.validator = validator;
+    this.repository = repository;
+    this.siteMap = siteMap;
+  }
+
+  @Post
+  public String register() {
+
+    User user = new User(dtoUser.getUsername(), dtoUser.getPassword());
+
+    if (!validator.isValid(user)) {
+      error = siteMap.dataMissmatch();
+      return null;
+    }
+    if (!repository.register(user)) {
+      error = siteMap.occupiedUsername();
+      return null;
     }
 
-    @Post
-    public String register() {
+    return siteMap.loginPage();
+  }
 
-        User user = new User(dtoUser.getUsername(), dtoUser.getPassword());
+  @Get
+  public void clear() {
+    error = null;
+  }
 
-        if (!validator.isValid(user)) {
-            error = siteMap.dataMissmatch();
-            return null;
-        }
-        if (repository.findByName(dtoUser.getUsername()).isPresent()) {
-            error = siteMap.occupiedUsername();
-            return null;
-        }
-        repository.add(user);
-        return siteMap.loginPage();
-    }
+  public void setDtoUser(DTOUser dtoUser) {
+    this.dtoUser = dtoUser;
+  }
 
-    @Get
-    public void clear() {
-        error = null;
-    }
+  public DTOUser getDtoUser() {
+    return dtoUser;
+  }
 
-    public void setDtoUser(DTOUser dtoUser) {
-        this.dtoUser = dtoUser;
-    }
-
-    public DTOUser getDtoUser() {
-        return dtoUser;
-    }
-
-    public String getError() {
-        return error;
-    }
+  public String getError() {
+    return error;
+  }
 }

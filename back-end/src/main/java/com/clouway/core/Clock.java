@@ -7,5 +7,8 @@ import java.util.Date;
  */
 public interface Clock {
 
-    Date now();
+  Date now();
+
+  Date nowPlus(Long miliseconds);
+
 }

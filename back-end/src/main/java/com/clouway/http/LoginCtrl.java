@@ -17,55 +17,51 @@ import javax.servlet.http.HttpServletResponse;
 
 @At("/login")
 @Show("/login.html")
-@Singleton
 public class LoginCtrl {
 
-    private UserRepository userRepository;
-    private SessionRepository sessionRepository;
-    private IdGenerator idGenerator;
-    private SiteMap siteMap;
-    private String error;
-    private DTOUser dtoUser = new DTOUser();
+  private UserRepository userRepository;
+  private SessionRepository sessionRepository;
+  private SiteMap siteMap;
+  private String error;
+  private DTOUser dtoUser = new DTOUser();
 
-    @Inject
-    public LoginCtrl(UserRepository userRepository, SessionRepository sessionRepository, IdGenerator idGenerator, SiteMap siteMap) {
+  @Inject
+  public LoginCtrl(UserRepository userRepository, SessionRepository sessionRepository, SiteMap siteMap) {
 
-        this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
-        this.idGenerator = idGenerator;
-        this.siteMap = siteMap;
+    this.userRepository = userRepository;
+    this.sessionRepository = sessionRepository;
+    this.siteMap = siteMap;
+  }
+
+  @Get
+  public void clear() {
+    error = null;
+  }
+
+  @Post
+  public String authenticate(HttpServletResponse response) {
+
+    User user = new User(dtoUser.getUsername(), dtoUser.getPassword());
+
+    if (!userRepository.login(user)) {
+      error = siteMap.loginFailed();
+      return null;
     }
 
-    @Get
-    public void clear() {
-        error = null;
-    }
+    String sessionId = sessionRepository.create(user.getName());
+    response.addCookie(new Cookie(siteMap.sessionCookieName(), sessionId));
+    return "/";
+  }
 
-    @Post
-    public String authenticate(HttpServletResponse response) {
+  public DTOUser getDtoUser() {
+    return dtoUser;
+  }
 
-        User user = new User(dtoUser.getUsername(), dtoUser.getPassword());
+  public void setDtoUser(DTOUser dtoUser) {
+    this.dtoUser = dtoUser;
+  }
 
-        if (!userRepository.find(user).isPresent()) {
-            error = siteMap.loginFailed();
-            return null;
-        }
-
-        String sessionId = idGenerator.generateFor(user);
-        sessionRepository.addNewSession(user.getName(), sessionId);
-        response.addCookie(new Cookie(siteMap.sessionCookieName(), sessionId));
-        return "/";
-    }
-
-    public DTOUser getDtoUser() {
-        return dtoUser;
-    }
-
-    public void setDtoUser(DTOUser dtoUser) {
-        this.dtoUser = dtoUser;
-    }
-
-    public String getError() {
-        return error;
-    }
+  public String getError() {
+    return error;
+  }
 }

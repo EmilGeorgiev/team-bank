@@ -5,5 +5,5 @@ package com.clouway.core;
  */
 public interface Validator<T> {
 
-    boolean isValid(T Object);
+  boolean isValid(T Object);
 }

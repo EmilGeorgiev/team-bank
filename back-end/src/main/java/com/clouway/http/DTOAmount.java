@@ -1,18 +1,21 @@
-package com.clouway.core;
+package com.clouway.http;
 
 /**
- * @author Emil Georgiev <emogeorgiev88@gmail.com>.
+ * Created by clouway on 14-10-16.
  */
-public class Amount {
+public class DTOAmount {
 
-  private final String amount;
+  private String amount;
 
-  public Amount(String amount) {
-    this.amount = amount;
+  public DTOAmount() {
   }
 
   public String getAmount() {
     return amount;
+  }
+
+  public void setAmount(String amount) {
+    this.amount = amount;
   }
 
   @Override
@@ -20,7 +23,7 @@ public class Amount {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    Amount amount1 = (Amount) o;
+    DTOAmount amount1 = (DTOAmount) o;
 
     if (amount != null ? !amount.equals(amount1.amount) : amount1.amount != null) return false;
 

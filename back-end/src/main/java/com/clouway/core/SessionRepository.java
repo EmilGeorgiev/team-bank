@@ -7,15 +7,15 @@ import com.google.common.base.Optional;
  */
 public interface SessionRepository {
 
-    CurrentUser findUserBy(String sessionId);
+  Optional<CurrentUser> findUser(String sessionId);
 
-    void addNewSession(String username, String sessionId);
+  String create(String username);
 
-    void remove(String sessionId);
+  void remove(String sessionId);
 
-    Optional<Session> find(String sessionId);
+  Optional<Session> find(String sessionId);
 
-    void updateSession(String sessionID);
+  void renewExpirationDate(String sessionID);
 
-    void removeSessionOn(String username);
+  boolean isSessionExpired(String sessionID);
 }

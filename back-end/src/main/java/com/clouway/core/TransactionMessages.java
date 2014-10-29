@@ -5,7 +5,9 @@ package com.clouway.core;
  */
 public interface TransactionMessages {
 
-    String onSuccess();
+  String onSuccess();
 
-    String onFailuer();
+  String amountIsGreater();
+
+  String noSuchUser();
 }

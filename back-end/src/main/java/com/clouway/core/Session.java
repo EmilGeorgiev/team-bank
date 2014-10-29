@@ -9,47 +9,42 @@ import java.util.Date;
  */
 public class Session {
 
-    private String username;
-    private String sessionId;
-    private Date expirationTime;
+  private final String username;
+  private final String sessionId;
+  private final Date expirationTime;
 
-    public Session(String username, String sessionId, Date expirationTime) {
-        this.username = username;
-        this.sessionId = sessionId;
-        this.expirationTime = expirationTime;
-    }
+  public Session(String username, String sessionId, Date expirationTime) {
+    this.username = username;
+    this.sessionId = sessionId;
+    this.expirationTime = expirationTime;
+  }
 
-    @Inject
-    public Session(String session) {
-        this.sessionId = session;
-    }
+  public String getSessionId() {
+    return sessionId;
+  }
 
-    public String getSessionId() {
-        return sessionId;
-    }
+  public String getUsername() {
+    return username;
+  }
 
-    public String getUsername() {
-        return username;
-    }
+  public Date getExpirationTime() {
+    return expirationTime;
+  }
 
-    public Date getExpirationTime() {
-        return expirationTime;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    Session session = (Session) o;
 
-        Session session = (Session) o;
+    if (sessionId != null ? !sessionId.equals(session.sessionId) : session.sessionId != null) return false;
 
-        if (sessionId != null ? !sessionId.equals(session.sessionId) : session.sessionId != null) return false;
+    return true;
+  }
 
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return sessionId != null ? sessionId.hashCode() : 0;
-    }
+  @Override
+  public int hashCode() {
+    return sessionId != null ? sessionId.hashCode() : 0;
+  }
 }

@@ -113,8 +113,8 @@ angular.module('transaction', ['ui.router'])
             clear();
         });
         $rootScope.$on('status', function (event, message) {
-           $scope.message = message;
-           clear();
+            $scope.message = message;
+            clear();
         });
 
         function clear() {

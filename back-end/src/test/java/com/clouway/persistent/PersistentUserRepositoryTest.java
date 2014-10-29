@@ -18,68 +18,52 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 public class PersistentUserRepositoryTest {
 
-    private PersistentUserRepository persistentUserRepository;
-    private DB db;
-    private UserUtil userUtil;
+  private PersistentUserRepository persistentUserRepository;
+  private DB db;
+  private UserUtil userUtil;
 
-    @Before
-    public void setUp() throws UnknownHostException {
-        MongoClient mongoClient = new MongoClient();
+  @Before
+  public void setUp() throws UnknownHostException {
+    MongoClient mongoClient = new MongoClient();
 
-        db = mongoClient.getDB("team-bank-test");
+    db = mongoClient.getDB("team-bank-test");
 
-        persistentUserRepository = new PersistentUserRepository(Providers.of(db));
+    persistentUserRepository = new PersistentUserRepository(Providers.of(db));
 
-        userUtil = new UserUtil(db);
+    userUtil = new UserUtil(db);
 
-        users().drop();
-        accounts().drop();
-    }
+    users().drop();
+    accounts().drop();
+  }
 
+  @Test
+  public void userBankAccountWasCreatedAfterRegistration() {
 
-    @Test
-    public void findUserByName() throws Exception {
+    User user = new User("Ivan", "123456");
 
-        pretendThatHasUser(name("username"), password("password"));
+    persistentUserRepository.register(user);
 
-        Optional<User> optional = persistentUserRepository.findByName("username");
+    assertThat(accounts().findOne(), notNullValue());
+  }
 
-        User user = optional.get();
+  private void pretendThatHasUser(String username, String password) {
+    userUtil.registerClient(username, password);
+  }
 
-        assertThat(user.getName(), is("username"));
-        assertThat(user.getPassword(), is("password"));
-    }
+  private String password(String password) {
+    return password;
+  }
 
+  private String name(String username) {
+    return username;
+  }
 
+  private DBCollection users() {
+    return db.getCollection("users");
+  }
 
-    @Test
-    public void userBankAccountWasCreatedAfterRegistration() {
-
-       User user = new User("Ivan", "123456");
-
-        persistentUserRepository.add(user);
-
-        assertThat(accounts().findOne(), notNullValue());
-    }
-
-    private void pretendThatHasUser(String username, String password) {
-        userUtil.registerClient(username, password);
-    }
-
-    private String password(String password) {
-        return password;
-    }
-
-    private String name(String username) {
-        return username;
-    }
-
-    private DBCollection users() {
-        return db.getCollection("users");
-    }
-
-    private DBCollection accounts() {
-        return db.getCollection("bank_accounts");
-    }
+  private DBCollection accounts() {
+    return db.getCollection("bank_accounts");
+  }
 
 }

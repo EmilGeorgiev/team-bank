@@ -17,85 +17,82 @@ import static org.hamcrest.core.IsNull.nullValue;
  * Created by clouway on 14-10-2.
  */
 public class RegistrationCtrlTest {
-    private RegistrationCtrl registrationCtrl;
-    private DTOUser dtoUser = new DTOUser();
-    private User user;
+  private RegistrationCtrl registrationCtrl;
+  private User user;
 
-    @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+  @Rule
+  public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    @Mock
-    UserRepository repository;
+  @Mock
+  UserRepository repository;
 
-    @Mock
-    Validator validator;
+  @Mock
+  Validator validator;
 
-    @Mock
-    SiteMap siteMap;
+  @Mock
+  SiteMap siteMap;
 
-    @Before
-    public void setUp() {
+  @Before
+  public void setUp() {
 
 
-        registrationCtrl = new RegistrationCtrl(validator, repository, siteMap);
+    registrationCtrl = new RegistrationCtrl(validator, repository, siteMap);
 
-        dtoUser = registrationCtrl.getDtoUser();
-        dtoUser.setUsername("username");
-        dtoUser.setPassword("password");
+    DTOUser dtoUser = registrationCtrl.getDtoUser();
+    dtoUser.setUsername("username");
+    dtoUser.setPassword("password");
 
-        user = new User("username", "password");
-    }
+    user = new User("username", "password");
+  }
 
-    @Test
-    public void createAccount() {
+  @Test
+  public void createAccount() {
 
-        final Optional<User> optional = Optional.absent();
+    final Optional<User> optional = Optional.absent();
 
-        context.checking(new Expectations() {
-            {
-                oneOf(validator).isValid(user);
-                will(returnValue(true));
+    context.checking(new Expectations() {
+      {
+        oneOf(validator).isValid(user);
+        will(returnValue(true));
 
-                oneOf(repository).findByName("username");
-                will(returnValue(optional));
+        oneOf(repository).register(user);
+        will(returnValue(true));
 
-                oneOf(repository).add(user);
+        oneOf(siteMap).loginPage();
+        will(returnValue("/login"));
+      }
+    });
 
-                oneOf(siteMap).loginPage();
-                will(returnValue("/login"));
-            }
-        });
+    assertThat(registrationCtrl.register(), is("/login"));
+  }
 
-        assertThat(registrationCtrl.register(), is("/login"));
-    }
+  @Test
+  public void userAlreadyExists() {
+    final Optional<User> optional = Optional.fromNullable(new User("name", "pass"));
+    context.checking(new Expectations() {
+      {
+        oneOf(validator).isValid(user);
+        will(returnValue(true));
 
-    @Test
-    public void userAlreadyExists() {
-        final Optional<User> optional = Optional.fromNullable(new User("name", "pass"));
-        context.checking(new Expectations() {
-            {
-                oneOf(validator).isValid(user);
-                will(returnValue(true));
+        oneOf(repository).register(user);
+        will(returnValue(false));
 
-                oneOf(repository).findByName("username");
-                will(returnValue(optional));
+        oneOf(siteMap).occupiedUsername();
+      }
+    });
+    assertThat(registrationCtrl.register(), nullValue());
+  }
 
-                oneOf(siteMap).occupiedUsername();
-            }
-        });
-        assertThat(registrationCtrl.register(), nullValue());
-    }
-
-    @Test
-    public void userDataAreNotCorrect() {
-        final Optional<User> optional = Optional.absent();
-        context.checking(new Expectations() {
-            {
-                oneOf(validator).isValid(user);
-                will(returnValue(false));
-                oneOf(siteMap).dataMissmatch();
-            }
-        });
-        assertThat(registrationCtrl.register(), nullValue());
-    }
+  @Test
+  public void userDataAreNotCorrect() {
+    final Optional<User> optional = Optional.absent();
+    context.checking(new Expectations() {
+      {
+        oneOf(validator).isValid(user);
+        will(returnValue(false));
+        oneOf(siteMap).dataMissmatch();
+      }
+    });
+    assertThat(registrationCtrl.register(), nullValue());
+  }
 }

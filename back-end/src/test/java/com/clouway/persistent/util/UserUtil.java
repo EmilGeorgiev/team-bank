@@ -11,21 +11,21 @@ import com.mongodb.DBObject;
 public class UserUtil {
 
 
-    private final DB db;
+  private final DB db;
 
-    public UserUtil(DB db) {
+  public UserUtil(DB db) {
 
-        this.db = db;
-    }
+    this.db = db;
+  }
 
-    public void registerClient(String name, String password) {
-        DBObject query = new BasicDBObject("username", name)
-                .append("password", password);
+  public void registerClient(String name, String password) {
+    DBObject query = new BasicDBObject("username", name)
+            .append("password", password);
 
-        users().insert(query);
-    }
+    users().insert(query);
+  }
 
-    private DBCollection users() {
-        return db.getCollection("users");
-    }
+  private DBCollection users() {
+    return db.getCollection("users");
+  }
 }

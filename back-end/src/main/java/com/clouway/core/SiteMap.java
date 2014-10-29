@@ -5,21 +5,21 @@ package com.clouway.core;
  */
 public interface SiteMap {
 
-    String sessionCookieName();
+  String sessionCookieName();
 
-    String loginPage();
+  String loginPage();
 
-    String index();
+  String index();
 
-    String loginFailed();
+  String loginFailed();
 
-    String transactionError();
+  String transactionError();
 
-    String dataMissmatch();
+  String dataMissmatch();
 
-    String occupiedUsername();
+  String occupiedUsername();
 
-    String registrationPage();
+  String registrationPage();
 
-    String logout();
+  String logout();
 }
