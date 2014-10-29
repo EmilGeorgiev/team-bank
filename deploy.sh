@@ -4,8 +4,8 @@ cd back-end
 
 mvn clean package
 rc=$?
-if [[ $rc != 0 ]] ;  then
-    echo "Build app failed"
+if [[ $rc == 1 ]] ;  then
+    echo "Build failed and deploy terminated!"
     exit $rc
 fi
 

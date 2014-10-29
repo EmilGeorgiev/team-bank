@@ -56,6 +56,7 @@ public class JettyServer {
         }
 
         Map<String, String> config = new HashMap<>();
+
         for (String key : configuration.stringPropertyNames()) {
             String value = configuration.getProperty(key);
             config.put(key, value);

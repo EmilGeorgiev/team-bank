@@ -7,9 +7,9 @@ import com.google.common.base.Optional;
  */
 public interface UserRepository {
 
-    Optional<User> find(User DTOUser);
+    Optional<User> find(User user);
 
     Optional<User> findByName(String username);
 
-    void add(User DTOUser);
+    void add(User user);
 }

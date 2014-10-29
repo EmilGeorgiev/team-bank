@@ -19,17 +19,17 @@ import java.math.BigDecimal;
  */
 @Singleton
 public class PersistentBankRepository implements BankRepository {
-    private final Provider<DB> dbProvider;
-    private final Provider<CurrentUser> currentUser;
+    private final Provider<DB> database;
+    private final Provider<CurrentUser> user;
     private final TransactionMessages transactionMessages;
 
     @Inject
-    public PersistentBankRepository(Provider<DB> dbProvider,
-                                    Provider<CurrentUser> currentUser,
+    public PersistentBankRepository(Provider<DB> database,
+                                    Provider<CurrentUser> user,
                                     TransactionMessages transactionMessages) {
 
-        this.dbProvider = dbProvider;
-        this.currentUser = currentUser;
+        this.database = database;
+        this.user = user;
         this.transactionMessages = transactionMessages;
     }
 
@@ -42,7 +42,7 @@ public class PersistentBankRepository implements BankRepository {
     @Override
     public TransactionStatus deposit(BigDecimal amount) {
 
-        DBObject query = new BasicDBObject("name", currentUser.get().name);
+        DBObject query = new BasicDBObject("name", user.get().name);
 
         BigDecimal newAmount = new BigDecimal(getBalance()).add(amount);
 
@@ -70,7 +70,7 @@ public class PersistentBankRepository implements BankRepository {
             return new TransactionStatus(transactionMessages.onFailuer(), currentAmount.toString());
         }
 
-        DBObject query = new BasicDBObject("name", currentUser.get().name);
+        DBObject query = new BasicDBObject("name", user.get().name);
 
         BigDecimal newAmount = new BigDecimal(getBalance()).subtract(amount);
 
@@ -84,7 +84,7 @@ public class PersistentBankRepository implements BankRepository {
     @Override
     public String getBalance() {
 
-        DBObject criteria = new BasicDBObject("name", currentUser.get().name);
+        DBObject criteria = new BasicDBObject("name", user.get().name);
 
         DBObject projection = new BasicDBObject("amount", 1)
                 .append("_id", 0);
@@ -95,6 +95,6 @@ public class PersistentBankRepository implements BankRepository {
     }
 
     private DBCollection bankAccounts() {
-        return dbProvider.get().getCollection("bank_accounts");
+        return database.get().getCollection("bank_accounts");
     }
 }

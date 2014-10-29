@@ -40,8 +40,8 @@ public class BankService {
         return Reply.with(bankRepository.getBalance()).ok();
     }
 
-    @At("/deposit")
     @Post
+    @At("/deposit")
     public Reply<?> deposit(Request request) {
 
         DTOAmount dtoAmount = request.read(DTOAmount.class).as(Json.class);
