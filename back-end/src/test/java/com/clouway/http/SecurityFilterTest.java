@@ -4,7 +4,6 @@ import com.clouway.core.Session;
 import com.clouway.core.SessionRepository;
 import com.clouway.core.SiteMap;
 import com.clouway.custommatcher.CapturingMatcher;
-import com.google.common.base.Optional;
 import com.google.inject.util.Providers;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -21,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SecurityFilterTest {
 
@@ -67,7 +69,6 @@ public class SecurityFilterTest {
     final CapturingMatcher<Cookie[]> capturingMatcher =
             new CapturingMatcher<>(Expectations.any(Cookie[].class));
 
-
     context.checking(new Expectations() {
       {
 
@@ -88,10 +89,17 @@ public class SecurityFilterTest {
 
     securityFilter.doFilter(request, response, filterChain);
 
+    boolean matcher = capturingMatcher.matches(cookies);
+
+    assertThat(matcher, is(true));
+
   }
 
   @Test
   public void sessionIsExpired() throws IOException, ServletException {
+
+    final CapturingMatcher<Cookie[]> capturingMatcher =
+            new CapturingMatcher<>(Expectations.any(Cookie[].class));
 
     context.checking(new Expectations() {
       {
@@ -114,10 +122,17 @@ public class SecurityFilterTest {
 
     securityFilter.doFilter(request, response, filterChain);
 
+    boolean matcher = capturingMatcher.matches(cookies);
+
+    assertThat(matcher, is(true));
+
   }
 
   @Test
   public void sessionIsExpiredAndRequestURIContainsAmount() throws Exception {
+
+    final CapturingMatcher<Cookie[]> capturingMatcher =
+            new CapturingMatcher<>(Expectations.any(Cookie[].class));
 
     context.checking(new Expectations() {
       {
@@ -136,6 +151,9 @@ public class SecurityFilterTest {
 
     securityFilter.doFilter(request, response, filterChain);
 
+    boolean matcher = capturingMatcher.matches(cookies);
+
+    assertThat(matcher, is(true));
   }
 
   private String sessionID(String sessionID) {
